@@ -10,105 +10,109 @@
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
 
 /* NAV */
-nav{width:100%;padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);background:rgba(4,4,15,.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
-.back{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;text-decoration:none;transition:color .2s}
-.back:hover{color:var(--text)}
-.back svg{width:16px;height:16px}
-.nav-title{font-weight:800;font-size:1rem;color:var(--gold);letter-spacing:.05em}
+nav{
+  width:100%;padding:1.1rem 1.75rem;
+  display:flex;align-items:center;gap:1rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(4,4,15,.9);backdrop-filter:blur(14px);
+  position:sticky;top:0;z-index:100;
+}
+.back{
+  display:inline-flex;align-items:center;gap:.45rem;
+  color:#e2e8f0;font-size:.88rem;font-weight:600;
+  text-decoration:none;
+  padding:.4rem .9rem;border-radius:20px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  transition:all .2s;
+}
+.back:hover{background:rgba(255,255,255,.12);color:#fff}
+.back svg{width:15px;height:15px}
+.nav-title{font-weight:800;font-size:1rem;color:var(--gold);letter-spacing:.06em}
 
-/* AMBIENT GLOW */
+/* GLOW */
 .glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.glow-bg::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.12),transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);animation:pulse 4s ease-in-out infinite alternate}
-@keyframes pulse{from{opacity:.6;transform:translate(-50%,-60%) scale(1)}to{opacity:1;transform:translate(-50%,-60%) scale(1.15)}}
+.glow-bg::before{content:'';position:absolute;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.11),transparent 70%);top:50%;left:50%;transform:translate(-50%,-55%);animation:pulse 5s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.5;transform:translate(-50%,-55%) scale(1)}to{opacity:1;transform:translate(-50%,-55%) scale(1.18)}}
 
 /* MAIN */
-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;gap:2.5rem;width:100%;max-width:600px}
+main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 2rem 3rem;gap:2rem;width:100%;max-width:560px}
 
 .page-title{text-align:center}
-.page-title h1{font-size:2.5rem;font-weight:900;letter-spacing:-.02em}
+.page-title h1{font-size:2.3rem;font-weight:900;letter-spacing:-.02em}
 .page-title h1 span{background:linear-gradient(135deg,#fde68a,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.page-title p{color:var(--muted);font-size:.9rem;margin-top:.4rem;letter-spacing:.05em}
+.page-title p{color:var(--muted);font-size:.82rem;margin-top:.35rem;letter-spacing:.06em}
 
-/* 3D COIN */
-.scene{width:220px;height:220px;perspective:700px;cursor:pointer;user-select:none}
-.coin{
-  width:100%;height:100%;position:relative;transform-style:preserve-3d;
-  transition:transform 2.4s cubic-bezier(.2,.6,.35,1);
-  filter:drop-shadow(0 0 30px rgba(245,158,11,.4));
+/* COIN STAGE */
+.stage{
+  height:320px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
 }
-.coin.idle{animation:float 3.5s ease-in-out infinite}
-@keyframes float{0%,100%{transform:rotateY(0deg) translateY(0)}50%{transform:rotateY(15deg) translateY(-12px)}}
-.coin.spinning{animation:none!important}
+.scene{width:220px;height:220px;perspective:750px;user-select:none}
+.coin{
+  width:100%;height:100%;
+  position:relative;transform-style:preserve-3d;
+  transform:translateY(0px) rotateX(0deg);
+  filter:drop-shadow(0 10px 30px rgba(245,158,11,.45)) drop-shadow(0 4px 10px rgba(0,0,0,.6));
+  will-change:transform;
+}
 .face,.back{
-  position:absolute;width:100%;height:100%;border-radius:50%;
+  position:absolute;inset:0;border-radius:50%;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  display:flex;align-items:center;justify-content:center;
   overflow:hidden;
 }
-.back{transform:rotateY(180deg)}
+/* TAILS face is behind — rotate 180deg around X so it shows when coin flips vertically */
+.back{transform:rotateX(180deg)}
 
-/* coin rim */
-.face::before,.back::before{
-  content:'';position:absolute;inset:0;border-radius:50%;
-  background:conic-gradient(from 0deg,rgba(255,255,255,.08),rgba(255,255,255,.02),rgba(255,255,255,.08),rgba(255,255,255,.02),rgba(255,255,255,.08));
+/* RESULT */
+.result-area{min-height:3.2rem;text-align:center}
+.result-label{
+  font-size:1.85rem;font-weight:900;letter-spacing:.06em;
+  opacity:0;transform:scale(.5) translateY(10px);
+  transition:all .45s cubic-bezier(.34,1.56,.64,1);
 }
+.result-label.show{opacity:1;transform:scale(1) translateY(0)}
+.result-label.heads{color:var(--gold);text-shadow:0 0 30px rgba(245,158,11,.7)}
+.result-label.tails{color:#cbd5e1;text-shadow:0 0 30px rgba(148,163,184,.6)}
+.result-sub{font-size:.88rem;color:var(--muted);margin-top:.3rem;opacity:0;transition:opacity .3s .25s}
+.result-label.show~.result-sub{opacity:1}
+
+/* BUTTON */
+.toss-btn{
+  padding:.95rem 3.5rem;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#fcd34d,#f59e0b,#d97706);
+  color:#1c0a00;font-size:1.1rem;font-weight:900;letter-spacing:.12em;
+  box-shadow:0 4px 28px rgba(245,158,11,.5);
+  transition:transform .2s,box-shadow .2s;
+  animation:btnPulse 2.8s ease-in-out infinite;
+}
+@keyframes btnPulse{0%,100%{box-shadow:0 4px 28px rgba(245,158,11,.4),0 0 0 0 rgba(245,158,11,.2)}50%{box-shadow:0 6px 36px rgba(245,158,11,.65),0 0 0 11px rgba(245,158,11,0)}}
+.toss-btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 40px rgba(245,158,11,.7)}
+.toss-btn:active{transform:scale(.97)}
+.toss-btn:disabled{opacity:.45;cursor:not-allowed;animation:none;transform:none}
 
 /* STATS */
 .stats{
   display:flex;gap:2.5rem;align-items:center;justify-content:center;
-  background:var(--glass);border:1px solid var(--border);
-  border-radius:20px;padding:1.2rem 2.5rem;
-  font-size:1.5rem;font-weight:900;
+  background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:1.1rem 2.5rem;
 }
-.stat-h{color:var(--gold)}
-.stat-t{color:var(--silver)}
-.stat-sep{color:var(--muted);font-size:1.2rem}
-.stat-label{display:block;font-size:.65rem;font-weight:500;color:var(--muted);letter-spacing:.15em;text-align:center;margin-top:.2rem}
-
-/* RESULT DISPLAY */
-.result-area{
-  min-height:3.5rem;text-align:center;
-  display:flex;flex-direction:column;align-items:center;gap:.4rem;
-}
-.result-label{
-  font-size:2rem;font-weight:900;letter-spacing:.05em;
-  opacity:0;transform:scale(.6);transition:all .4s cubic-bezier(.34,1.56,.64,1);
-}
-.result-label.show{opacity:1;transform:scale(1)}
-.result-label.heads{color:var(--gold);text-shadow:0 0 30px rgba(245,158,11,.7)}
-.result-label.tails{color:var(--silver);text-shadow:0 0 30px rgba(148,163,184,.7)}
-.result-jp{font-size:1rem;color:var(--muted);opacity:0;transition:opacity .4s .2s}
-.result-label.show~.result-jp{opacity:1}
-
-/* BUTTON */
-.toss-btn{
-  padding:1rem 3.5rem;border-radius:50px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,#fbbf24,#f59e0b,#d97706);
-  color:#1c0a00;font-size:1.15rem;font-weight:900;letter-spacing:.12em;
-  text-transform:uppercase;
-  box-shadow:0 4px 30px rgba(245,158,11,.5),0 0 0 0 rgba(245,158,11,.4);
-  transition:all .25s;
-  animation:btnPulse 2.5s ease-in-out infinite;
-}
-@keyframes btnPulse{0%,100%{box-shadow:0 4px 30px rgba(245,158,11,.4),0 0 0 0 rgba(245,158,11,.25)}50%{box-shadow:0 6px 40px rgba(245,158,11,.6),0 0 0 12px rgba(245,158,11,0)}}
-.toss-btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 40px rgba(245,158,11,.7)}
-.toss-btn:active{transform:translateY(0) scale(.97)}
-.toss-btn:disabled{opacity:.5;cursor:not-allowed;animation:none;transform:none}
+.stat-val{font-size:1.8rem;font-weight:900}
+.stat-val.h{color:var(--gold)}
+.stat-val.t{color:#cbd5e1}
+.stat-sep{color:var(--muted);font-size:1.1rem}
+.stat-label{display:block;font-size:.62rem;font-weight:500;color:var(--muted);letter-spacing:.15em;text-align:center;margin-top:.2rem}
 
 /* HISTORY */
-.history{display:flex;flex-direction:column;align-items:center;gap:.75rem;width:100%}
-.history-label{font-size:.72rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
-.history-dots{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.history{display:flex;flex-direction:column;align-items:center;gap:.65rem;width:100%}
+.hist-label{font-size:.7rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
+.hist-dots{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;min-height:28px}
 .dot{
-  width:28px;height:28px;border-radius:50%;
+  width:28px;height:28px;border-radius:50%;font-size:.62rem;font-weight:700;
   display:flex;align-items:center;justify-content:center;
-  font-size:.65rem;font-weight:700;
-  transition:all .3s cubic-bezier(.34,1.56,.64,1);
-  animation:dotPop .4s cubic-bezier(.34,1.56,.64,1) backwards;
+  animation:dotPop .35s cubic-bezier(.34,1.56,.64,1) backwards;
 }
 @keyframes dotPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.dot.H{background:rgba(245,158,11,.2);border:2px solid var(--gold);color:var(--gold)}
-.dot.T{background:rgba(148,163,184,.12);border:2px solid var(--silver);color:var(--silver)}
+.dot.H{background:rgba(245,158,11,.18);border:2px solid var(--gold);color:var(--gold)}
+.dot.T{background:rgba(203,213,225,.1);border:2px solid #94a3b8;color:#cbd5e1}
 </style>
 </head>
 <body>
@@ -128,178 +132,305 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
     <p>COIN TOSS — TAP THE COIN OR BUTTON</p>
   </div>
 
-  <!-- 3D Coin -->
-  <div class="scene" id="scene" onclick="toss()">
-    <div class="coin idle" id="coin">
-      <!-- HEADS face -->
-      <div class="face">
-        <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="hg" cx="38%" cy="32%">
-              <stop offset="0%" stop-color="#fef3c7"/>
-              <stop offset="40%" stop-color="#fbbf24"/>
-              <stop offset="75%" stop-color="#f59e0b"/>
-              <stop offset="100%" stop-color="#92400e"/>
-            </radialGradient>
-            <radialGradient id="hinner" cx="50%" cy="50%">
-              <stop offset="0%" stop-color="#fde68a" stop-opacity=".3"/>
-              <stop offset="100%" stop-color="#b45309" stop-opacity=".1"/>
-            </radialGradient>
-            <filter id="glow1"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          <!-- outer coin -->
-          <circle cx="110" cy="110" r="106" fill="url(#hg)"/>
-          <!-- rim detail -->
-          <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/>
-          <!-- inner ring -->
-          <circle cx="110" cy="110" r="88" fill="url(#hinner)" stroke="rgba(255,200,50,.35)" stroke-width="1.5"/>
-          <!-- decorative pattern -->
-          <circle cx="110" cy="110" r="72" fill="none" stroke="rgba(255,200,50,.2)" stroke-width="1" stroke-dasharray="4 3"/>
-          <!-- cherry blossom petals -->
-          <g filter="url(#glow1)">
-            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(0 110 110)"/>
-            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(72 110 110)"/>
-            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(144 110 110)"/>
-            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(216 110 110)"/>
-            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(288 110 110)"/>
-          </g>
-          <!-- center yen symbol -->
-          <text x="110" y="122" text-anchor="middle" font-size="56" font-weight="900" fill="rgba(180,90,0,.9)" font-family="serif" filter="url(#glow1)">¥</text>
-          <!-- HEADS text -->
-          <text x="110" y="175" text-anchor="middle" font-size="13" font-weight="700" fill="rgba(180,90,0,.7)" letter-spacing="5" font-family="sans-serif">HEADS</text>
-          <!-- shine overlay -->
-          <ellipse cx="82" cy="70" rx="28" ry="14" fill="rgba(255,255,255,.22)" transform="rotate(-30 82 70)"/>
-        </svg>
-      </div>
-      <!-- TAILS face -->
-      <div class="back">
-        <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="tg" cx="38%" cy="32%">
-              <stop offset="0%" stop-color="#f1f5f9"/>
-              <stop offset="45%" stop-color="#cbd5e1"/>
-              <stop offset="80%" stop-color="#94a3b8"/>
-              <stop offset="100%" stop-color="#334155"/>
-            </radialGradient>
-            <radialGradient id="tinner" cx="50%" cy="50%">
-              <stop offset="0%" stop-color="#e2e8f0" stop-opacity=".3"/>
-              <stop offset="100%" stop-color="#475569" stop-opacity=".1"/>
-            </radialGradient>
-            <filter id="glow2"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          <circle cx="110" cy="110" r="106" fill="url(#tg)"/>
-          <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
-          <circle cx="110" cy="110" r="88" fill="url(#tinner)" stroke="rgba(200,220,240,.3)" stroke-width="1.5"/>
-          <circle cx="110" cy="110" r="72" fill="none" stroke="rgba(200,220,240,.18)" stroke-width="1" stroke-dasharray="4 3"/>
-          <!-- star pattern -->
-          <g filter="url(#glow2)">
-            <polygon points="110,70 114,100 142,100 120,118 128,148 110,130 92,148 100,118 78,100 106,100" fill="rgba(200,220,255,.65)" transform="scale(.7) translate(47,47)"/>
-          </g>
-          <!-- large star -->
-          <g filter="url(#glow2)" transform="translate(110,105)">
-            <polygon points="0,-38 8,-14 34,-14 14,4 22,30 0,14 -22,30 -14,4 -34,-14 -8,-14" fill="rgba(180,200,230,.8)"/>
-          </g>
-          <text x="110" y="175" text-anchor="middle" font-size="13" font-weight="700" fill="rgba(80,110,150,.75)" letter-spacing="5" font-family="sans-serif">TAILS</text>
-          <ellipse cx="82" cy="70" rx="28" ry="14" fill="rgba(255,255,255,.2)" transform="rotate(-30 82 70)"/>
-        </svg>
-      </div>
-    </div>
-  </div>
+  <div class="stage" onclick="toss()">
+    <div class="scene">
+      <div class="coin" id="coin">
+
+        <!-- ===== HEADS / 表 ===== -->
+        <div class="face">
+          <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="hg" cx="36%" cy="30%" r="70%">
+                <stop offset="0%"   stop-color="#fef9c3"/>
+                <stop offset="28%"  stop-color="#fcd34d"/>
+                <stop offset="62%"  stop-color="#f59e0b"/>
+                <stop offset="100%" stop-color="#78350f"/>
+              </radialGradient>
+              <radialGradient id="hrim" cx="50%" cy="50%">
+                <stop offset="80%" stop-color="transparent"/>
+                <stop offset="100%" stop-color="rgba(255,200,0,.12)"/>
+              </radialGradient>
+              <filter id="relief">
+                <feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-color="rgba(80,30,0,.55)"/>
+              </filter>
+              <filter id="emboss">
+                <feDropShadow dx="1.5" dy="2" stdDeviation="1.5" flood-color="rgba(80,30,0,.5)"/>
+                <feDropShadow dx="-1" dy="-1" stdDeviation="1" flood-color="rgba(255,220,80,.25)" result="hi"/>
+              </filter>
+              <clipPath id="coinClip"><circle cx="110" cy="110" r="106"/></clipPath>
+            </defs>
+            <!-- body -->
+            <circle cx="110" cy="110" r="106" fill="url(#hg)"/>
+            <!-- milling edge -->
+            <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2.5"/>
+            <circle cx="110" cy="110" r="101" fill="none" stroke="rgba(120,53,15,.4)" stroke-width="1.5" stroke-dasharray="3.5 3" clip-path="url(#coinClip)"/>
+            <!-- outer decorative ring -->
+            <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(255,190,20,.35)" stroke-width="1.4"/>
+            <!-- inner ring -->
+            <circle cx="110" cy="110" r="76" fill="none" stroke="rgba(255,190,20,.22)" stroke-width="1"/>
+            <!-- circular text: top arc -->
+            <path id="topArc" d="M 28 110 A 82 82 0 1 1 192 110" fill="none"/>
+            <text font-size="9.5" font-weight="700" fill="rgba(100,40,5,.75)" letter-spacing="3.8" font-family="-apple-system,sans-serif">
+              <textPath href="#topArc" startOffset="5%">· BITCOIN · DIGITAL · DECENTRALIZED · PEER TO PEER ·</textPath>
+            </text>
+            <!-- circular text: bottom arc -->
+            <path id="botArc" d="M 192 110 A 82 82 0 1 1 28 110" fill="none"/>
+            <text font-size="9" font-weight="600" fill="rgba(100,40,5,.55)" letter-spacing="4" font-family="-apple-system,sans-serif">
+              <textPath href="#botArc" startOffset="8%">CURRENCY · 2009 · SATOSHI · NAKAMOTO ·</textPath>
+            </text>
+            <!-- ₿ symbol - 3D emboss effect -->
+            <text x="113" y="136" text-anchor="middle" font-size="76" font-weight="900"
+                  fill="rgba(255,230,100,.15)" font-family="-apple-system,Arial,sans-serif">₿</text>
+            <text x="111" y="134" text-anchor="middle" font-size="76" font-weight="900"
+                  fill="rgba(80,30,0,.9)" font-family="-apple-system,Arial,sans-serif"
+                  filter="url(#relief)">₿</text>
+            <text x="110" y="133" text-anchor="middle" font-size="76" font-weight="900"
+                  fill="rgba(255,220,80,.85)" font-family="-apple-system,Arial,sans-serif">₿</text>
+            <!-- OMOTE label -->
+            <text x="110" y="186" text-anchor="middle" font-size="10.5" font-weight="700"
+                  fill="rgba(80,30,0,.6)" letter-spacing="6" font-family="-apple-system,sans-serif">表 HEADS</text>
+            <!-- specular shine -->
+            <ellipse cx="76" cy="62" rx="34" ry="16" fill="rgba(255,255,255,.28)" transform="rotate(-38 76 62)"/>
+            <ellipse cx="88" cy="54" rx="12" ry="5" fill="rgba(255,255,255,.18)" transform="rotate(-38 88 54)"/>
+          </svg>
+        </div>
+
+        <!-- ===== TAILS / 裏 ===== -->
+        <!-- Note: rotateX(180deg) is on .back — so content appears right-side-up when coin shows tails -->
+        <div class="back">
+          <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="tg" cx="36%" cy="30%" r="70%">
+                <stop offset="0%"   stop-color="#fef9c3"/>
+                <stop offset="28%"  stop-color="#fcd34d"/>
+                <stop offset="62%"  stop-color="#f59e0b"/>
+                <stop offset="100%" stop-color="#78350f"/>
+              </radialGradient>
+              <filter id="trelief">
+                <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="rgba(80,30,0,.5)"/>
+              </filter>
+              <clipPath id="coinClip2"><circle cx="110" cy="110" r="106"/></clipPath>
+            </defs>
+            <!-- body (same gold as heads) -->
+            <circle cx="110" cy="110" r="106" fill="url(#tg)"/>
+            <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2.5"/>
+            <circle cx="110" cy="110" r="101" fill="none" stroke="rgba(120,53,15,.4)" stroke-width="1.5" stroke-dasharray="3.5 3" clip-path="url(#coinClip2)"/>
+            <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(255,190,20,.3)" stroke-width="1.3"/>
+
+            <!-- circuit board background rectangle -->
+            <rect x="46" y="46" width="128" height="128" rx="6"
+                  fill="rgba(60,25,5,.35)" stroke="rgba(200,150,20,.35)" stroke-width="1.2"/>
+
+            <!-- Top memory bank (rows of segments) -->
+            <rect x="54" y="52" width="112" height="14" rx="2"
+                  fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <!-- memory segment dividers -->
+            <line x1="72"  y1="52" x2="72"  y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="90"  y1="52" x2="90"  y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="108" y1="52" x2="108" y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="126" y1="52" x2="126" y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="144" y1="52" x2="144" y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+
+            <!-- Left side components -->
+            <rect x="51" y="76" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <rect x="51" y="96" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <rect x="51" y="116" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <rect x="51" y="136" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+
+            <!-- Right side components -->
+            <rect x="145" y="76" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <rect x="145" y="96" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <rect x="145" y="116" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <rect x="145" y="136" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+
+            <!-- Central CPU chip -->
+            <rect x="80" y="76" width="60" height="88" rx="4"
+                  fill="rgba(50,20,5,.65)" stroke="rgba(200,150,20,.7)" stroke-width="1.6"/>
+
+            <!-- Chip pins top -->
+            <line x1="91"  y1="70" x2="91"  y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="101" y1="70" x2="101" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="111" y1="70" x2="111" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="121" y1="70" x2="121" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="129" y1="70" x2="129" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Chip pins bottom -->
+            <line x1="91"  y1="164" x2="91"  y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="101" y1="164" x2="101" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="111" y1="164" x2="111" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="121" y1="164" x2="121" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="129" y1="164" x2="129" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Chip pins left -->
+            <line x1="74" y1="89"  x2="80" y2="89"  stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="74" y1="102" x2="80" y2="102" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="74" y1="115" x2="80" y2="115" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="74" y1="128" x2="80" y2="128" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="74" y1="141" x2="80" y2="141" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Chip pins right -->
+            <line x1="146" y1="89"  x2="140" y2="89"  stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="146" y1="102" x2="140" y2="102" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="146" y1="115" x2="140" y2="115" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="146" y1="128" x2="140" y2="128" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="146" y1="141" x2="140" y2="141" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+
+            <!-- Chip inner frame -->
+            <rect x="84" y="80" width="52" height="20" rx="2"
+                  fill="rgba(100,50,5,.5)" stroke="rgba(200,150,20,.45)" stroke-width=".8"/>
+            <!-- APPROVED text -->
+            <text x="110" y="94" text-anchor="middle" font-size="9.5" font-weight="800"
+                  fill="rgba(255,210,60,.95)" font-family="monospace,sans-serif" letter-spacing="1.5"
+                  filter="url(#trelief)">APPROVED</text>
+            <!-- 000 -->
+            <text x="110" y="115" text-anchor="middle" font-size="10" font-weight="600"
+                  fill="rgba(255,210,60,.75)" font-family="monospace" letter-spacing="4">000</text>
+            <!-- N₿B -->
+            <text x="110" y="133" text-anchor="middle" font-size="14" font-weight="900"
+                  fill="rgba(255,210,60,.9)" font-family="serif,sans-serif" letter-spacing="3"
+                  filter="url(#trelief)">N₿B</text>
+            <!-- 2009 -->
+            <text x="110" y="151" text-anchor="middle" font-size="10" font-weight="600"
+                  fill="rgba(255,210,60,.75)" font-family="monospace" letter-spacing="3.5">2009</text>
+
+            <!-- Bottom row of chips -->
+            <rect x="54" y="154" width="112" height="14" rx="2"
+                  fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="72"  y1="154" x2="72"  y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="90"  y1="154" x2="90"  y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="108" y1="154" x2="108" y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="126" y1="154" x2="126" y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <line x1="144" y1="154" x2="144" y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+
+            <!-- corner pads -->
+            <rect x="49" y="49" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
+            <rect x="162" y="49" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
+            <rect x="49" y="162" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
+            <rect x="162" y="162" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
+
+            <!-- URAFACE label -->
+            <text x="110" y="196" text-anchor="middle" font-size="10.5" font-weight="700"
+                  fill="rgba(80,30,0,.6)" letter-spacing="6" font-family="-apple-system,sans-serif">裏 TAILS</text>
+
+            <!-- specular shine (same position — appears mirrored naturally due to rotateX) -->
+            <ellipse cx="76" cy="62" rx="34" ry="16" fill="rgba(255,255,255,.22)" transform="rotate(-38 76 62)"/>
+            <ellipse cx="88" cy="54" rx="12" ry="5" fill="rgba(255,255,255,.14)" transform="rotate(-38 88 54)"/>
+          </svg>
+        </div>
+
+      </div><!-- /coin -->
+    </div><!-- /scene -->
+  </div><!-- /stage -->
 
   <div class="result-area">
     <div class="result-label" id="result-label"></div>
-    <div class="result-jp" id="result-jp"></div>
+    <div class="result-sub" id="result-sub"></div>
   </div>
 
   <button class="toss-btn" id="toss-btn" onclick="toss()">TOSS!</button>
 
   <div class="stats">
     <div>
-      <span class="stat-h" id="h-count">0</span>
+      <span class="stat-val h" id="h-count">0</span>
       <span class="stat-label">HEADS / 表</span>
     </div>
     <span class="stat-sep">·</span>
     <div>
-      <span class="stat-t" id="t-count">0</span>
+      <span class="stat-val t" id="t-count">0</span>
       <span class="stat-label">TAILS / 裏</span>
     </div>
   </div>
 
   <div class="history">
-    <div class="history-label">履歴 HISTORY</div>
-    <div class="history-dots" id="dots"></div>
+    <div class="hist-label">履歴 HISTORY</div>
+    <div class="hist-dots" id="dots"></div>
   </div>
 </main>
 
 <script>
-const coin = document.getElementById('coin');
-const resultLabel = document.getElementById('result-label');
-const resultJp = document.getElementById('result-jp');
-const btn = document.getElementById('toss-btn');
+const coin   = document.getElementById('coin');
+const resLbl = document.getElementById('result-label');
+const resSub = document.getElementById('result-sub');
+const btn    = document.getElementById('toss-btn');
 const dotsEl = document.getElementById('dots');
+
+let rotX = 0;          // cumulative rotation — never reset between tosses
+let animating = false;
 let hCount = 0, tCount = 0;
-let spinning = false;
-const history = [];
+const hist = [];
 
-function toss() {
-  if (spinning) return;
-  spinning = true;
-  btn.disabled = true;
-
-  const isHeads = Math.random() < .5;
-
-  // Remove idle float animation
-  coin.classList.remove('idle');
-  coin.classList.add('spinning');
-
-  // Reset instantly
-  coin.style.transition = 'none';
-  coin.style.transform = 'rotateY(0deg)';
-  void coin.offsetWidth; // force reflow
-
-  // Animate: 5 full spins + result angle
-  const spins = 5;
-  const finalAngle = isHeads ? spins * 360 : spins * 360 + 180;
-  coin.style.transition = 'transform 2.4s cubic-bezier(.2,.6,.35,1)';
-  coin.style.transform = `rotateY(${finalAngle}deg)`;
-
-  // Hide result during spin
-  resultLabel.classList.remove('show');
-
-  setTimeout(() => {
-    // Reset to canonical position without animation
-    coin.style.transition = 'none';
-    coin.style.transform = isHeads ? 'rotateY(0deg)' : 'rotateY(180deg)';
-    coin.classList.remove('spinning');
-    coin.classList.add('idle');
-
-    // Show result
-    resultLabel.textContent = isHeads ? '表 — HEADS' : '裏 — TAILS';
-    resultJp.textContent = isHeads ? '表が出ました！' : '裏が出ました！';
-    resultLabel.className = 'result-label show ' + (isHeads ? 'heads' : 'tails');
-
-    // Update stats
-    if (isHeads) { hCount++; document.getElementById('h-count').textContent = hCount; }
-    else { tCount++; document.getElementById('t-count').textContent = tCount; }
-
-    // Update history (max 12)
-    const mark = isHeads ? 'H' : 'T';
-    history.push(mark);
-    if (history.length > 12) history.shift();
-    renderDots();
-
-    spinning = false;
-    btn.disabled = false;
-  }, 2500);
+/* ---- helpers ---- */
+function calcEndAngle(cur, isHeads) {
+  const BASE    = 4 * 360;          // minimum 4 full spins
+  const target  = isHeads ? 0 : 180;
+  const curr360 = ((cur % 360) + 360) % 360;
+  let diff = ((target - curr360) + 360) % 360;
+  if (diff < 45) diff += 360;       // avoid tiny spin if already near target
+  return cur + BASE + diff;
 }
 
-function renderDots() {
+function easeOut(t) { return 1 - Math.pow(1 - t, 2.5); }
+
+/* ---- main toss ---- */
+function toss() {
+  if (animating) return;
+  animating = true;
+  btn.disabled = true;
+  resLbl.classList.remove('show');
+
+  const isHeads   = Math.random() < 0.5;
+  const startAngle = rotX;
+  const endAngle   = calcEndAngle(rotX, isHeads);
+  const delta      = endAngle - startAngle;
+
+  const DURATION  = 1750;   // ms
+  const ARC_HEIGHT = -190;  // px upward (negative = up in CSS)
+  const startTime  = performance.now();
+
+  function frame(now) {
+    const t = Math.min((now - startTime) / DURATION, 1);
+
+    /* rotation: linear phase → ease-out landing */
+    const SPLIT = 0.78;
+    const rotT  = t < SPLIT
+      ? t                                                // linear in-air
+      : SPLIT + (1 - SPLIT) * easeOut((t - SPLIT) / (1 - SPLIT)); // ease-out landing
+
+    /* parabolic arc — peaks at t≈0.42, biased toward faster throw */
+    const y = ARC_HEIGHT * Math.sin(t * Math.PI) * (1 + 0.3 * Math.sin(t * Math.PI));
+
+    coin.style.transform = `translateY(${y.toFixed(2)}px) rotateX(${(startAngle + delta * rotT).toFixed(2)}deg)`;
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      rotX = endAngle;
+      coin.style.transform = `translateY(0px) rotateX(${endAngle}deg)`;
+      animating = false;
+      btn.disabled = false;
+      showResult(isHeads);
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function showResult(isHeads) {
+  /* counts */
+  if (isHeads) { hCount++; document.getElementById('h-count').textContent = hCount; }
+  else         { tCount++; document.getElementById('t-count').textContent = tCount; }
+
+  /* label */
+  resLbl.textContent = isHeads ? '表 — HEADS' : '裏 — TAILS';
+  resLbl.className   = 'result-label show ' + (isHeads ? 'heads' : 'tails');
+  resSub.textContent = isHeads ? 'おめでとう！表が出ました！' : '裏が出ました！';
+
+  /* history */
+  hist.push(isHeads ? 'H' : 'T');
+  if (hist.length > 14) hist.shift();
   dotsEl.innerHTML = '';
-  history.forEach((m, i) => {
+  hist.forEach((m, i) => {
     const d = document.createElement('div');
     d.className = `dot ${m}`;
     d.textContent = m;
-    d.style.animationDelay = '0s';
+    d.style.animationDelay = `${i * 0.04}s`;
     dotsEl.appendChild(d);
   });
 }
