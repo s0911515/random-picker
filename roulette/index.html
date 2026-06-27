@@ -108,12 +108,7 @@ nav{padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1
 .result-label{font-size:.8rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.75rem}
 .result-winner{font-size:3rem;font-weight:900;color:var(--pink);text-shadow:0 0 40px rgba(236,72,153,.8);margin-bottom:.5rem}
 .result-sub{font-size:.9rem;color:var(--muted)}
-.close-btn{
-  margin-top:2rem;padding:.75rem 2rem;border-radius:50px;border:1px solid rgba(236,72,153,.4);
-  background:transparent;color:var(--pink);font-weight:700;cursor:pointer;font-size:.9rem;
-  transition:all .2s;
-}
-.close-btn:hover{background:rgba(236,72,153,.1)}
+.close-hint{margin-top:1.75rem;font-size:.78rem;color:var(--muted);letter-spacing:.1em}
 
 /* confetti canvas */
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:99}
@@ -151,12 +146,12 @@ nav{padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeResult(event)">
+<div class="overlay" id="overlay" onclick="closeOverlay()">
   <div class="result-card">
     <div class="result-label">WINNER — 当選！</div>
     <div class="result-winner" id="winner-text"></div>
     <div class="result-sub" id="winner-sub"></div>
-    <button class="close-btn" onclick="closeOverlay()">もう一度 / AGAIN</button>
+    <div class="close-hint">— タップして閉じる / TAP ANYWHERE TO CLOSE —</div>
   </div>
 </div>
 
@@ -166,7 +161,7 @@ const COLORS = [
   '#06b6d4','#6366f1','#a855f7','#e879f9','#fb7185','#4ade80'
 ];
 
-let items = ['チョコレート','バニラ','ストロベリー','マンゴー','抹茶','キャラメル'];
+let items = [];
 let spinning = false;
 let angle = 0;
 let velocity = 0;
@@ -206,7 +201,6 @@ function addItem() {
 }
 
 function removeItem(i) {
-  if (items.length <= 2) return;
   items.splice(i, 1);
   renderList();
   drawWheel();
@@ -217,9 +211,27 @@ function drawWheel(rot) {
   const W = canvas.width, H = canvas.height;
   const cx = W / 2, cy = H / 2, radius = Math.min(cx, cy) - 8;
   const n = items.length;
-  const seg = (Math.PI * 2) / n;
 
   ctx.clearRect(0, 0, W, H);
+
+  if (n === 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(236,72,153,.2)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(236,72,153,.06)';
+    ctx.fill();
+    ctx.fillStyle = 'rgba(100,116,139,.6)';
+    ctx.font = '700 15px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('項目を追加してください', cx, cy);
+    ctx.textBaseline = 'alphabetic';
+    return;
+  }
+
+  const seg = (Math.PI * 2) / n;
 
   /* outer glow ring */
   const glowGrad = ctx.createRadialGradient(cx, cy, radius - 6, cx, cy, radius + 10);
@@ -347,10 +359,6 @@ function showResult() {
   document.getElementById('winner-sub').textContent = `${idx + 1} / ${n} 番目の項目`;
   document.getElementById('overlay').classList.add('show');
   startConfetti();
-}
-
-function closeResult(e) {
-  if (e.target === document.getElementById('overlay')) closeOverlay();
 }
 
 function closeOverlay() {
