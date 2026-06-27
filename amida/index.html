@@ -145,6 +145,8 @@ let ROWS = 20;
 let generated = false;
 let tracing = false;
 let revealedResults = {}; // startCol => { destCol, path }
+let currentDimPath = null; // only the latest completed path (dimmed)
+let tracingColor = null;   // color of the person currently animating
 
 const canvas = document.getElementById('ac');
 const ctx = canvas.getContext('2d');
@@ -336,18 +338,20 @@ function drawAmida(highlightPath, animFrac) {
     ctx.shadowBlur = 0;
   });
 
-  // Draw all previously revealed paths (dimmed)
-  Object.values(revealedResults).forEach(({ path }) => {
-    drawPath(path, 1, colX, rowY, H, true);
-  });
+  // Show only the last completed path (dimmed, in that person's color)
+  if (currentDimPath) {
+    drawPath(currentDimPath.path, 1, colX, rowY, H, true,
+      PALETTE[currentDimPath.col % PALETTE.length]);
+  }
 
-  // Draw current animation path on top
+  // Draw current animation path on top (in this person's color)
   if (highlightPath && highlightPath.length > 1) {
-    drawPath(highlightPath, animFrac, colX, rowY, H, false);
+    drawPath(highlightPath, animFrac, colX, rowY, H, false, tracingColor);
   }
 }
 
-function drawPath(path, frac, colX, rowY, H, dim) {
+function drawPath(path, frac, colX, rowY, H, dim, color) {
+  const c = color || '#34d399';
   const totalLen = path.length - 1;
   const drawUpTo = frac * totalLen;
 
@@ -370,11 +374,8 @@ function drawPath(path, frac, colX, rowY, H, dim) {
 
     ctx.beginPath();
     ctx.moveTo(sx, sy); ctx.lineTo(mx, my);
-    const grad = ctx.createLinearGradient(sx, sy, mx, my);
-    grad.addColorStop(0, '#6ee7b7');
-    grad.addColorStop(1, '#34d399');
-    ctx.strokeStyle = grad;
-    ctx.shadowColor = '#34d399';
+    ctx.strokeStyle = c;
+    ctx.shadowColor = c;
     ctx.shadowBlur = dim ? 4 : 14;
     ctx.stroke();
     ctx.shadowBlur = 0;
@@ -383,7 +384,7 @@ function drawPath(path, frac, colX, rowY, H, dim) {
       ctx.beginPath();
       ctx.arc(mx, my, 8, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
-      ctx.shadowColor = '#34d399';
+      ctx.shadowColor = c;
       ctx.shadowBlur = 20;
       ctx.fill();
       ctx.shadowBlur = 0;
@@ -473,6 +474,8 @@ canvas.addEventListener('click', e => {
 function startTrace(col) {
   if (tracing || revealedResults[col]) return;
   tracing = true;
+  currentDimPath = null;                          // clear previous trail immediately
+  tracingColor = PALETTE[col % PALETTE.length];   // this person's color
   const path = tracePath(col);
   const totalFrames = path.length * 16;
   let frame = 0;
@@ -485,9 +488,10 @@ function startTrace(col) {
       requestAnimationFrame(animate);
     } else {
       tracing = false;
+      tracingColor = null;
       const destCol = path[path.length-1].col;
-      // Store result before showing overlay
       revealedResults[col] = { destCol, path };
+      currentDimPath = { col, path }; // keep only this person's trail
       const names = getNames();
       const prizes = getPrizes();
       setTimeout(() => {
@@ -512,6 +516,8 @@ function resetAll() {
   rungs = [];
   tracing = false;
   revealedResults = {};
+  currentDimPath = null;
+  tracingColor = null;
   document.getElementById('instruction').style.display = 'none';
   document.getElementById('gen-btn').textContent = 'あみだを作る / GENERATE';
   resetCanvas();
