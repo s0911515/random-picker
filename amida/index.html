@@ -10,7 +10,7 @@
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
 
 nav{width:100%;padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);background:rgba(4,4,15,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
-.back{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;text-decoration:none;transition:color .2s}.back:hover{color:var(--text)}.back svg{width:16px;height:16px}
+.nav-back{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;text-decoration:none;transition:color .2s}.nav-back:hover{color:var(--text)}.nav-back svg{width:16px;height:16px}
 .nav-title{font-weight:800;font-size:1rem;color:var(--green);letter-spacing:.05em}
 
 .glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0}
@@ -25,19 +25,15 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 .page-title p{color:var(--muted);font-size:.82rem;margin-top:.3rem;letter-spacing:.08em}
 
 /* INPUTS */
-.setup-panel{
-  width:100%;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:1.5rem;
-}
-.setup-header{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;
-}
-.setup-title{font-size:.9rem;font-weight:700;color:var(--green);letter-spacing:.08em}
+.setup-panel{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:1.5rem}
+.setup-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem}
+
+/* unified section title font */
+.section-title{font-size:.9rem;font-weight:700;color:var(--green);letter-spacing:.08em}
+.prizes-section{margin-top:1.25rem}
+
 .count-ctrl{display:flex;align-items:center;gap:.75rem}
-.cnt-btn{
-  width:30px;height:30px;border-radius:50%;border:1px solid rgba(52,211,153,.35);
-  background:transparent;color:var(--green);font-size:1.2rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all .2s;
-}
+.cnt-btn{width:30px;height:30px;border-radius:50%;border:1px solid rgba(52,211,153,.35);background:transparent;color:var(--green);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .cnt-btn:hover{background:rgba(52,211,153,.15)}
 .cnt-num{font-size:1rem;font-weight:700;color:var(--green);min-width:1.5rem;text-align:center}
 .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem}
@@ -49,48 +45,29 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 }
 .name-input:focus,.prize-input:focus{border-color:var(--green)}
 .name-input::placeholder,.prize-input::placeholder{color:var(--muted)}
-.prizes-section{margin-top:1.25rem}
-.prizes-title{font-size:.7rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.75rem}
-.prize-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem}
+.prize-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-top:.75rem}
 
 /* INSTRUCTIONS */
-.instruction{
-  font-size:.85rem;color:var(--muted);text-align:center;
-  background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);
-  border-radius:12px;padding:.75rem 1.5rem;
-}
+.instruction{font-size:.85rem;color:var(--muted);text-align:center;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:12px;padding:.75rem 1.5rem}
 
 /* CANVAS AREA */
-.canvas-outer{
-  position:relative;width:100%;overflow-x:auto;
-  background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:20px;padding:1rem;
-}
+.canvas-outer{position:relative;width:100%;overflow-x:auto;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:20px;padding:1rem}
 #ac{display:block;margin:0 auto;max-width:100%}
 
 /* BUTTONS */
 .btn-row{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
-.gen-btn,.reset-btn{
-  padding:.85rem 2.25rem;border-radius:50px;border:none;cursor:pointer;
-  font-size:1rem;font-weight:900;letter-spacing:.08em;transition:all .25s;
-}
-.gen-btn{
-  background:linear-gradient(135deg,#6ee7b7,#34d399,#059669);color:#011b0d;
-  box-shadow:0 4px 28px rgba(52,211,153,.4);animation:btnGlow 2.5s ease-in-out infinite;
-}
+.gen-btn,.reset-btn{padding:.85rem 2.25rem;border-radius:50px;border:none;cursor:pointer;font-size:1rem;font-weight:900;letter-spacing:.08em;transition:all .25s}
+.gen-btn{background:linear-gradient(135deg,#6ee7b7,#34d399,#059669);color:#011b0d;box-shadow:0 4px 28px rgba(52,211,153,.4);animation:btnGlow 2.5s ease-in-out infinite}
 @keyframes btnGlow{0%,100%{box-shadow:0 4px 28px rgba(52,211,153,.35),0 0 0 0 rgba(52,211,153,.2)}50%{box-shadow:0 6px 36px rgba(52,211,153,.6),0 0 0 10px rgba(52,211,153,0)}}
 .gen-btn:hover{transform:translateY(-3px) scale(1.04)}
 .gen-btn:disabled{opacity:.4;cursor:not-allowed;animation:none;transform:none}
 .reset-btn{background:var(--glass);border:1px solid var(--border);color:var(--muted)}
 .reset-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
 
-/* RESULT OVERLAY */
-.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(4,4,15,.87);backdrop-filter:blur(8px)}
+/* RESULT OVERLAY — click anywhere to close */
+.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(4,4,15,.87);backdrop-filter:blur(8px);cursor:pointer}
 .overlay.show{display:flex}
-.result-card{
-  background:rgba(10,25,20,.9);border:1px solid rgba(52,211,153,.4);border-radius:28px;
-  padding:3rem 4rem;text-align:center;position:relative;overflow:hidden;
-  animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
-}
+.result-card{background:rgba(10,25,20,.9);border:1px solid rgba(52,211,153,.4);border-radius:28px;padding:3rem 4rem;text-align:center;position:relative;overflow:hidden;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .result-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(52,211,153,.18),transparent 70%)}
 .r-from{font-size:.85rem;color:var(--muted);letter-spacing:.15em;margin-bottom:.6rem}
@@ -98,8 +75,7 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 .r-arrow{font-size:2rem;color:var(--green);margin-bottom:.3rem}
 .r-prize{font-size:2.5rem;font-weight:900;color:var(--green);text-shadow:0 0 30px rgba(52,211,153,.7);margin-bottom:.5rem}
 .r-label{font-size:.8rem;color:var(--muted)}
-.close-btn{margin-top:2rem;padding:.7rem 2rem;border-radius:50px;border:1px solid rgba(52,211,153,.35);background:transparent;color:var(--green);font-weight:700;cursor:pointer;font-size:.9rem;transition:all .2s}
-.close-btn:hover{background:rgba(52,211,153,.1)}
+.close-hint{margin-top:1.75rem;font-size:.78rem;color:var(--muted);letter-spacing:.1em}
 
 /* confetti */
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:99}
@@ -110,7 +86,7 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 <canvas id="confetti"></canvas>
 
 <nav>
-  <a class="back" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>TOP</a>
+  <a class="nav-back" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>TOP</a>
   <span class="nav-title">✦ あみだくじ</span>
 </nav>
 
@@ -122,7 +98,7 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 
   <div class="setup-panel">
     <div class="setup-header">
-      <div class="setup-title">参加者 PARTICIPANTS</div>
+      <div class="section-title">参加者 PARTICIPANTS</div>
       <div class="count-ctrl">
         <button class="cnt-btn" onclick="changeN(-1)">−</button>
         <span class="cnt-num" id="n-num">4</span>
@@ -132,7 +108,7 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
     </div>
     <div class="input-grid" id="name-grid"></div>
     <div class="prizes-section">
-      <div class="prizes-title">当選項目 PRIZES</div>
+      <div class="section-title">当選項目 PRIZES</div>
       <div class="prize-grid" id="prize-grid"></div>
     </div>
   </div>
@@ -143,7 +119,7 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
   </div>
 
   <div class="instruction" id="instruction" style="display:none">
-    上の名前をクリックして運命のパスを辿ろう！
+    名前をクリックしてパスを辿ろう！引いた人はグレーになります。
   </div>
 
   <div class="canvas-outer">
@@ -151,23 +127,24 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
   </div>
 </main>
 
-<div class="overlay" id="overlay">
+<div class="overlay" id="overlay" onclick="closeOverlay()">
   <div class="result-card">
     <div class="r-from">参加者</div>
     <div class="r-name" id="r-name">—</div>
     <div class="r-arrow">↓</div>
     <div class="r-prize" id="r-prize">—</div>
-    <div class="r-label">WINNER!</div>
-    <button class="close-btn" onclick="closeOverlay()">閉じる / CLOSE</button>
+    <div class="r-label" id="r-label">結果</div>
+    <div class="close-hint">— タップして閉じる / TAP TO CLOSE —</div>
   </div>
 </div>
 
 <script>
 let N = 4;
-let rungs = [];      // [{col1, col2, row}]
-let ROWS = 12;       // number of horizontal segments
+let rungs = [];
+let ROWS = 20;
 let generated = false;
 let tracing = false;
+let revealedResults = {}; // startCol => { destCol, path }
 
 const canvas = document.getElementById('ac');
 const ctx = canvas.getContext('2d');
@@ -178,20 +155,20 @@ const PALETTE = ['#34d399','#22d3ee','#f472b6','#f59e0b','#a78bfa','#fb923c'];
 function buildInputs() {
   const ng = document.getElementById('name-grid');
   const pg = document.getElementById('prize-grid');
-  const defaultNames = ['Alice','Bob','Carol','Dave','Eve','Frank'];
+  const defaultNames  = ['Alice','Bob','Carol','Dave','Eve','Frank'];
   const defaultPrizes = ['🎉 大当たり','😊 当たり','🍀 小当たり','😅 ハズレ','🎁 プレゼント','💎 特賞'];
   ng.innerHTML = ''; pg.innerHTML = '';
   for (let i = 0; i < N; i++) {
-    const ng_div = document.createElement('div');
-    ng_div.className = 'name-group';
-    ng_div.innerHTML = `<span class="name-label" style="color:${PALETTE[i]}">参加者 ${i+1}</span>
-      <input class="name-input" id="name-${i}" type="text" placeholder="${defaultNames[i]}" maxlength="8" value="${defaultNames[i]}"/>`;
-    ng.appendChild(ng_div);
-    const pg_div = document.createElement('div');
-    pg_div.className = 'name-group';
-    pg_div.innerHTML = `<span class="name-label" style="color:${PALETTE[i]}">賞品 ${i+1}</span>
-      <input class="prize-input" id="prize-${i}" type="text" placeholder="${defaultPrizes[i]}" maxlength="10" value="${defaultPrizes[i]}"/>`;
-    pg.appendChild(pg_div);
+    const nd = document.createElement('div');
+    nd.className = 'name-group';
+    nd.innerHTML = `<span class="name-label" style="color:${PALETTE[i]}">参加者 ${i+1}</span>
+      <input class="name-input" id="name-${i}" type="text" maxlength="8" value="${defaultNames[i]}"/>`;
+    ng.appendChild(nd);
+    const pd = document.createElement('div');
+    pd.className = 'name-group';
+    pd.innerHTML = `<span class="name-label" style="color:${PALETTE[i]}">賞品 ${i+1}</span>
+      <input class="prize-input" id="prize-${i}" type="text" maxlength="10" value="${defaultPrizes[i]}"/>`;
+    pg.appendChild(pd);
   }
 }
 
@@ -202,11 +179,16 @@ function changeN(d) {
   document.getElementById('n-num').textContent = N;
   buildInputs();
   resetCanvas();
+  generated = false;
+  revealedResults = {};
+  document.getElementById('instruction').style.display = 'none';
+  document.getElementById('gen-btn').textContent = 'あみだを作る / GENERATE';
 }
 
 /* ---- GENERATE ---- */
 function generate() {
   generated = true;
+  revealedResults = {};
   rungs = generateRungs();
   drawAmida();
   document.getElementById('instruction').style.display = 'block';
@@ -217,11 +199,10 @@ function generateRungs() {
   const result = [];
   for (let row = 0; row < ROWS; row++) {
     const used = new Set();
-    // Shuffle columns to pick which ones get rungs
     const cols = shuffle(Array.from({length: N-1}, (_,i) => i));
     for (const c of cols) {
       if (!used.has(c) && !used.has(c+1)) {
-        if (Math.random() < .45) {
+        if (Math.random() < .65) {
           result.push({ c, row });
           used.add(c); used.add(c+1);
         }
@@ -239,17 +220,21 @@ function shuffle(arr) {
   return arr;
 }
 
-/* ---- DRAW ---- */
+/* ---- LAYOUT ---- */
 const PAD = 60, TOP = 70, BOT_PAD = 70;
 
 function layout() {
   const W = Math.max(N * 100, 240);
-  const H = TOP + ROWS * 50 + BOT_PAD + 40;
+  const H = TOP + ROWS * 42 + BOT_PAD + 40;
   canvas.width = W;
   canvas.height = H;
-  return { W, H, colX: Array.from({length:N},(_,i)=>PAD + i*(W-PAD*2)/(N-1)) };
+  const colX = N === 1
+    ? [W / 2]
+    : Array.from({length:N}, (_,i) => PAD + i * (W - PAD*2) / (N-1));
+  return { W, H, colX };
 }
 
+/* ---- DRAW ---- */
 function drawAmida(highlightPath, animFrac) {
   const { W, H, colX } = layout();
   ctx.clearRect(0, 0, W, H);
@@ -295,60 +280,56 @@ function drawAmida(highlightPath, animFrac) {
   // Top name buttons
   const names = getNames();
   colX.forEach((x, i) => {
-    const color = PALETTE[i % PALETTE.length];
-    // Button bg
+    const revealed = !!revealedResults[i];
+    const color = revealed ? 'rgba(100,116,139,.5)' : PALETTE[i % PALETTE.length];
     ctx.beginPath();
     roundRect(ctx, x - 36, 8, 72, 36, 10);
-    ctx.fillStyle = color + '22';
+    ctx.fillStyle = revealed ? 'rgba(255,255,255,.03)' : PALETTE[i % PALETTE.length] + '22';
     ctx.fill();
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    // Circle at top
     ctx.beginPath(); ctx.arc(x, TOP, 7, 0, Math.PI*2);
     ctx.fillStyle = color; ctx.fill();
-    // Name text
     ctx.fillStyle = color;
     ctx.font = `600 13px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText(names[i].slice(0,6), x, 32);
   });
 
-  // Bottom prize circles
+  // Bottom prize circles — prizes[i] at fixed column i (no spoiler arrows)
   const prizes = getPrizes();
-  const mapping = computeMapping();
   colX.forEach((x, i) => {
     const color = PALETTE[i % PALETTE.length];
     ctx.beginPath(); ctx.arc(x, H - BOT_PAD, 7, 0, Math.PI*2);
     ctx.fillStyle = color + '33'; ctx.fill();
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
-    const prizeIdx = mapping[i];
     ctx.fillStyle = color;
     ctx.font = `600 11px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
-    // Prize text (wrapped)
-    const pt = prizes[prizeIdx] || '—';
+    const pt = prizes[i] || '—';
     ctx.fillText(pt.slice(0,8), x, H - BOT_PAD + 22);
-    ctx.fillStyle = 'rgba(255,255,255,.3)';
-    ctx.font = `500 9px -apple-system,sans-serif`;
-    ctx.fillText(`→ ${names[prizeIdx]}`, x, H - BOT_PAD + 36);
   });
 
-  // Animated path
-  if (highlightPath && highlightPath.length > 1) {
-    drawPath(highlightPath, animFrac, colX, rowY, H);
-  }
+  // Draw all previously revealed paths (dimmed)
+  Object.values(revealedResults).forEach(({ path }) => {
+    drawPath(path, 1, colX, rowY, H, true);
+  });
 
-  // Click zones (drawn invisibly, handled via JS click)
+  // Draw current animation path on top
+  if (highlightPath && highlightPath.length > 1) {
+    drawPath(highlightPath, animFrac, colX, rowY, H, false);
+  }
 }
 
-function drawPath(path, frac, colX, rowY, H) {
+function drawPath(path, frac, colX, rowY, H, dim) {
   const totalLen = path.length - 1;
   const drawUpTo = frac * totalLen;
 
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineWidth = 5;
+  ctx.globalAlpha = dim ? 0.3 : 1;
 
   let drawn = 0;
   for (let i = 0; i < path.length - 1 && drawn < drawUpTo; i++) {
@@ -369,12 +350,11 @@ function drawPath(path, frac, colX, rowY, H) {
     grad.addColorStop(1, '#34d399');
     ctx.strokeStyle = grad;
     ctx.shadowColor = '#34d399';
-    ctx.shadowBlur = 14;
+    ctx.shadowBlur = dim ? 4 : 14;
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // Bright head dot
-    if (t === 1 || i === Math.floor(drawUpTo)) {
+    if (!dim && (t === 1 || i === Math.floor(drawUpTo))) {
       ctx.beginPath();
       ctx.arc(mx, my, 8, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
@@ -383,7 +363,6 @@ function drawPath(path, frac, colX, rowY, H) {
       ctx.fill();
       ctx.shadowBlur = 0;
     }
-
     drawn++;
   }
   ctx.restore();
@@ -408,13 +387,10 @@ function roundRect(ctx, x, y, w, h, r) {
 
 /* ---- TRACING LOGIC ---- */
 function computeMapping() {
-  // Returns mapping[col] = final destination column for participant at col
   const mapping = Array.from({length:N},(_,i)=>i);
-  // For each starting column, trace the path
   for (let start = 0; start < N; start++) {
     let col = start;
     for (let row = 0; row < ROWS; row++) {
-      // Check for rung at this "half-row" that connects col to col-1 or col+1
       const rung = rungs.find(r => r.row === row && (r.c === col || r.c === col - 1));
       if (rung) col = rung.c === col ? col + 1 : col - 1;
     }
@@ -424,15 +400,14 @@ function computeMapping() {
 }
 
 function tracePath(startCol) {
-  // Returns array of {col, row} waypoints
   const path = [{ col: startCol, row: -1 }];
   let col = startCol;
   for (let row = 0; row < ROWS; row++) {
-    path.push({ col, row }); // entering this row from above
+    path.push({ col, row });
     const rung = rungs.find(r => r.row === row && (r.c === col || r.c === col - 1));
     if (rung) {
       col = rung.c === col ? col + 1 : col - 1;
-      path.push({ col, row }); // after crossing rung
+      path.push({ col, row });
     }
   }
   path.push({ col, row: ROWS });
@@ -471,10 +446,10 @@ canvas.addEventListener('click', e => {
 });
 
 function startTrace(col) {
-  if (tracing) return;
+  if (tracing || revealedResults[col]) return;
   tracing = true;
   const path = tracePath(col);
-  const totalFrames = path.length * 18;
+  const totalFrames = path.length * 16;
   let frame = 0;
 
   function animate() {
@@ -484,10 +459,10 @@ function startTrace(col) {
     if (frame <= totalFrames) {
       requestAnimationFrame(animate);
     } else {
-      // Show result
       tracing = false;
-      const mapping = computeMapping();
       const destCol = path[path.length-1].col;
+      // Store result before showing overlay
+      revealedResults[col] = { destCol, path };
       const names = getNames();
       const prizes = getPrizes();
       setTimeout(() => {
@@ -504,13 +479,14 @@ function startTrace(col) {
 function closeOverlay() {
   document.getElementById('overlay').classList.remove('show');
   stopConfetti();
-  drawAmida(); // redraw clean
+  drawAmida(); // redraw showing all revealed paths so far
 }
 
 function resetAll() {
   generated = false;
   rungs = [];
   tracing = false;
+  revealedResults = {};
   document.getElementById('instruction').style.display = 'none';
   document.getElementById('gen-btn').textContent = 'あみだを作る / GENERATE';
   resetCanvas();
