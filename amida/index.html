@@ -221,7 +221,7 @@ function shuffle(arr) {
 }
 
 /* ---- LAYOUT ---- */
-const PAD = 60, TOP = 70, BOT_PAD = 90;
+const PAD = 60, TOP = 70, BOT_PAD = 100;
 
 function layout() {
   const W = Math.max(N * 100, 240);
@@ -241,24 +241,15 @@ function drawAmida(highlightPath, animFrac) {
 
   const rowY = row => TOP + row * ((H - TOP - BOT_PAD) / ROWS);
 
-  // Background glow columns
-  colX.forEach((x, i) => {
-    const grad = ctx.createLinearGradient(x, TOP, x, H-BOT_PAD);
-    grad.addColorStop(0, PALETTE[i] + '20');
-    grad.addColorStop(1, PALETTE[i] + '05');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x - 18, TOP, 36, H - TOP - BOT_PAD);
-  });
-
-  // Vertical lines
-  colX.forEach((x, i) => {
+  // Vertical lines — neutral white (no per-column color to avoid false association)
+  colX.forEach((x) => {
     ctx.beginPath();
     ctx.moveTo(x, TOP);
     ctx.lineTo(x, H - BOT_PAD);
-    ctx.strokeStyle = PALETTE[i % PALETTE.length];
+    ctx.strokeStyle = 'rgba(255,255,255,.55)';
     ctx.lineWidth = 2.5;
-    ctx.shadowColor = PALETTE[i % PALETTE.length];
-    ctx.shadowBlur = 6;
+    ctx.shadowColor = 'rgba(255,255,255,.2)';
+    ctx.shadowBlur = 5;
     ctx.stroke();
     ctx.shadowBlur = 0;
   });
@@ -297,32 +288,51 @@ function drawAmida(highlightPath, animFrac) {
     ctx.fillText(names[i].slice(0,6), x, 32);
   });
 
-  // Bottom prize circles — prizes[i] at fixed column i (no spoiler arrows)
+  // Bottom prize circles — neutral white (no per-column color)
   const prizes = getPrizes();
+  const LINE_COLOR = 'rgba(255,255,255,.55)';
+  const PRIZE_TEXT = '#cbd5e1';
   colX.forEach((x, i) => {
-    const color = PALETTE[i % PALETTE.length];
     ctx.beginPath(); ctx.arc(x, H - BOT_PAD, 7, 0, Math.PI*2);
-    ctx.fillStyle = color + '33'; ctx.fill();
-    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.fillStyle = color;
+    ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fill();
+    ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = PRIZE_TEXT;
     ctx.font = `700 12px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
     const pt = prizes[i] || '—';
-    ctx.fillText(pt.slice(0,8), x, H - BOT_PAD + 22);
+    ctx.fillText(pt.slice(0, 8), x, H - BOT_PAD + 22);
   });
 
-  // Show revealed names below their destination prize
+  // Show revealed names below their destination prize (in the person's color)
   Object.entries(revealedResults).forEach(([startColStr, { destCol }]) => {
     const startCol = parseInt(startColStr);
     const x = colX[destCol];
     const color = PALETTE[startCol % PALETTE.length];
+    const nameText = names[startCol].slice(0, 6);
+
+    // Pill background
+    ctx.save();
+    const pillW = Math.max(nameText.length * 8 + 16, 48);
+    const pillH = 36;
+    const pillY = H - BOT_PAD + 32;
+    ctx.beginPath();
+    roundRect(ctx, x - pillW/2, pillY, pillW, pillH, 8);
+    ctx.fillStyle = color + '22';
+    ctx.fill();
+    ctx.strokeStyle = color + '66';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    // Arrow + name text
     ctx.fillStyle = color;
-    ctx.font = `700 11px -apple-system,sans-serif`;
+    ctx.font = `700 13px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
     ctx.shadowColor = color;
-    ctx.shadowBlur = 6;
-    ctx.fillText('↓', x, H - BOT_PAD + 40);
-    ctx.fillText(names[startCol].slice(0, 6), x, H - BOT_PAD + 56);
+    ctx.shadowBlur = 8;
+    ctx.fillText('↓', x, pillY + 14);
+    ctx.font = `800 13px -apple-system,sans-serif`;
+    ctx.fillText(nameText, x, pillY + 28);
     ctx.shadowBlur = 0;
   });
 
