@@ -71,9 +71,9 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .result-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(52,211,153,.18),transparent 70%)}
 .r-from{font-size:.85rem;color:var(--muted);letter-spacing:.15em;margin-bottom:.6rem}
-.r-name{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
-.r-arrow{font-size:2rem;color:var(--green);margin-bottom:.3rem}
-.r-prize{font-size:2.5rem;font-weight:900;color:var(--green);text-shadow:0 0 30px rgba(52,211,153,.7);margin-bottom:.5rem}
+.r-name{font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
+.r-arrow{font-size:2.2rem;color:var(--green);margin-bottom:.3rem}
+.r-prize{font-size:3.2rem;font-weight:900;color:var(--green);text-shadow:0 0 40px rgba(52,211,153,.8);margin-bottom:.5rem}
 .r-label{font-size:.8rem;color:var(--muted)}
 .close-hint{margin-top:1.75rem;font-size:.78rem;color:var(--muted);letter-spacing:.1em}
 
@@ -156,7 +156,7 @@ function buildInputs() {
   const ng = document.getElementById('name-grid');
   const pg = document.getElementById('prize-grid');
   const defaultNames  = ['Alice','Bob','Carol','Dave','Eve','Frank'];
-  const defaultPrizes = ['🎉 大当たり','😊 当たり','🍀 小当たり','😅 ハズレ','🎁 プレゼント','💎 特賞'];
+  const defaultPrizes = ['大当たり','当たり','小当たり','ハズレ','プレゼント','特賞'];
   ng.innerHTML = ''; pg.innerHTML = '';
   for (let i = 0; i < N; i++) {
     const nd = document.createElement('div');
@@ -221,7 +221,7 @@ function shuffle(arr) {
 }
 
 /* ---- LAYOUT ---- */
-const PAD = 60, TOP = 70, BOT_PAD = 70;
+const PAD = 60, TOP = 70, BOT_PAD = 90;
 
 function layout() {
   const W = Math.max(N * 100, 240);
@@ -305,10 +305,25 @@ function drawAmida(highlightPath, animFrac) {
     ctx.fillStyle = color + '33'; ctx.fill();
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.fillStyle = color;
-    ctx.font = `600 11px -apple-system,sans-serif`;
+    ctx.font = `700 12px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
     const pt = prizes[i] || '—';
     ctx.fillText(pt.slice(0,8), x, H - BOT_PAD + 22);
+  });
+
+  // Show revealed names below their destination prize
+  Object.entries(revealedResults).forEach(([startColStr, { destCol }]) => {
+    const startCol = parseInt(startColStr);
+    const x = colX[destCol];
+    const color = PALETTE[startCol % PALETTE.length];
+    ctx.fillStyle = color;
+    ctx.font = `700 11px -apple-system,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 6;
+    ctx.fillText('↓', x, H - BOT_PAD + 40);
+    ctx.fillText(names[startCol].slice(0, 6), x, H - BOT_PAD + 56);
+    ctx.shadowBlur = 0;
   });
 
   // Draw all previously revealed paths (dimmed)
