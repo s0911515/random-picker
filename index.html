@@ -227,7 +227,6 @@ footer{
         <ellipse cx="19" cy="17" rx="5" ry="3" fill="rgba(255,255,255,.25)" transform="rotate(-30 19 17)"/>
       </svg>
     </div>
-    <div class="c-tag">COIN TOSS</div>
     <h3 class="c-title"><span class="c-en">Coin Toss</span>コイントス</h3>
     <p class="c-desc">コインを投げて表か裏かを決めます。<br>シンプルな2択の決断に最適。</p>
     <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
@@ -253,7 +252,6 @@ footer{
         <polygon points="26,2 23,8 29,8" fill="#fbbf24"/>
       </svg>
     </div>
-    <div class="c-tag">ROULETTE</div>
     <h3 class="c-title"><span class="c-en">Roulette</span>ルーレット</h3>
     <p class="c-desc">項目を自由に追加してルーレットを回し、<br>ランダムに1つを選びます。</p>
     <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
@@ -267,24 +265,23 @@ footer{
       <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="dg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#164e63"/><stop offset="100%" stop-color="#0c3a4e"/></linearGradient>
-          <linearGradient id="dg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity=".35"/><stop offset="100%" stop-color="#0891b2" stop-opacity=".2"/></linearGradient>
-          <linearGradient id="dg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0891b2" stop-opacity=".25"/><stop offset="100%" stop-color="#164e63" stop-opacity=".15"/></linearGradient>
+          <linearGradient id="dg2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#0891b2" stop-opacity=".4"/><stop offset="100%" stop-color="#22d3ee" stop-opacity=".65"/></linearGradient>
+          <linearGradient id="dg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity=".3"/><stop offset="100%" stop-color="#0891b2" stop-opacity=".15"/></linearGradient>
         </defs>
-        <!-- front face -->
-        <rect x="12" y="18" width="28" height="28" rx="5" fill="url(#dg1)" stroke="#22d3ee" stroke-width="1.2"/>
-        <!-- top face -->
-        <path d="M12 18 L26 10 L40 18 L26 26Z" fill="url(#dg2)" stroke="#22d3ee" stroke-width="1.2"/>
-        <!-- right face -->
-        <path d="M40 18 L40 46 L26 54 L26 26Z" fill="url(#dg3)" stroke="#22d3ee" stroke-width="1.2"/>
-        <!-- dots on front (showing 5) -->
-        <circle cx="19" cy="26" r="2.2" fill="#22d3ee" opacity=".9"/>
-        <circle cx="26" cy="32" r="2.2" fill="#22d3ee" opacity=".9"/>
-        <circle cx="33" cy="26" r="2.2" fill="#22d3ee" opacity=".9"/>
-        <circle cx="19" cy="38" r="2.2" fill="#22d3ee" opacity=".9"/>
-        <circle cx="33" cy="38" r="2.2" fill="#22d3ee" opacity=".9"/>
+        <!-- front face: (10,20)→(34,44) -->
+        <rect x="10" y="20" width="24" height="24" rx="4" fill="url(#dg1)" stroke="#22d3ee" stroke-width="1.2"/>
+        <!-- top face: depth vector (+12,−8) -->
+        <path d="M10 20 L22 12 L46 12 L34 20Z" fill="url(#dg2)" stroke="#22d3ee" stroke-width="1.2"/>
+        <!-- right face: all within viewBox -->
+        <path d="M34 20 L46 12 L46 36 L34 44Z" fill="url(#dg3)" stroke="#22d3ee" stroke-width="1.2"/>
+        <!-- pips on front face (5) -->
+        <circle cx="16" cy="26" r="2.1" fill="#22d3ee" opacity=".9"/>
+        <circle cx="28" cy="26" r="2.1" fill="#22d3ee" opacity=".9"/>
+        <circle cx="22" cy="32" r="2.1" fill="#22d3ee" opacity=".9"/>
+        <circle cx="16" cy="38" r="2.1" fill="#22d3ee" opacity=".9"/>
+        <circle cx="28" cy="38" r="2.1" fill="#22d3ee" opacity=".9"/>
       </svg>
     </div>
-    <div class="c-tag">DICE ROLL</div>
     <h3 class="c-title"><span class="c-en">Dice Roll</span>ダイスロール</h3>
     <p class="c-desc">1〜6個のサイコロを振ります。<br>RPGや様々な決定に活用できます。</p>
     <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
@@ -318,7 +315,6 @@ footer{
         <line x1="39" y1="27" x2="39" y2="46" stroke="#a7f3d0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
       </svg>
     </div>
-    <div class="c-tag">AMIDA LOTTERY</div>
     <h3 class="c-title"><span class="c-en">Amida Lottery</span>あみだくじ</h3>
     <p class="c-desc">おなじみのあみだくじをデジタルで。<br>参加者の名前を入力してスタート。</p>
     <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
@@ -326,7 +322,7 @@ footer{
 
 </section>
 
-<footer>RANDOM PICKER &copy; 2025 — Made with ✦ and randomness</footer>
+<footer>RANDOM PICKER &copy; 2026 s0911515 — Made with ✦ and randomness</footer>
 
 <script>
 (function(){
