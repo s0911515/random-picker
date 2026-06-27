@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RANDOM PICKER — 運命を決めよう</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04040f;--glass:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);
+  --text:#e2e8f0;--muted:#64748b;
+  --purple:#a78bfa;--pink:#f472b6;--cyan:#22d3ee;--gold:#fbbf24;--green:#34d399;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+#c{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* HEADER */
+header{
+  position:relative;z-index:10;
+  padding:1.25rem 2.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  background:rgba(4,4,15,.7);
+}
+.h-logo{
+  font-size:1.05rem;font-weight:900;letter-spacing:.08em;
+  background:linear-gradient(90deg,var(--purple),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.h-badge{
+  padding:.25rem .75rem;border-radius:20px;
+  background:var(--glass);border:1px solid var(--border);
+  font-size:.72rem;color:var(--muted);letter-spacing:.12em;
+}
+
+/* HERO */
+.hero{
+  position:relative;z-index:1;
+  text-align:center;padding:8rem 2rem 5rem;
+}
+.hero-title{
+  font-size:clamp(3.5rem,14vw,11rem);
+  font-weight:900;letter-spacing:-3px;line-height:.88;
+  background:linear-gradient(135deg,#c4b5fd 0%,#f9a8d4 45%,#67e8f9 85%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:glow 5s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 60px rgba(167,139,250,.35));
+}
+@keyframes glow{
+  from{filter:drop-shadow(0 0 40px rgba(167,139,250,.25))}
+  to{filter:drop-shadow(0 0 90px rgba(244,114,182,.55))}
+}
+.hero-en{
+  display:block;font-size:clamp(.9rem,2vw,1.2rem);
+  letter-spacing:.4em;color:var(--muted);margin-bottom:.5rem;
+  text-transform:uppercase;font-weight:400;
+}
+.hero-desc{
+  margin-top:1.8rem;font-size:1.05rem;color:#7a8fa8;
+  max-width:460px;margin-inline:auto;line-height:1.75;
+}
+.scroll-hint{
+  margin-top:3.5rem;display:inline-flex;flex-direction:column;
+  align-items:center;gap:.5rem;color:var(--muted);
+  font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;
+  animation:bobbing 2.2s ease-in-out infinite;
+}
+@keyframes bobbing{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(8px);opacity:1}}
+
+/* SECTION */
+.section-head{
+  position:relative;z-index:1;
+  text-align:center;padding:1rem 2rem 0;
+}
+.s-label{
+  display:inline-block;padding:.3rem 1rem;border-radius:20px;
+  background:var(--glass);border:1px solid var(--border);
+  color:var(--muted);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;
+}
+.s-title{
+  font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;
+  background:linear-gradient(135deg,var(--text),var(--muted));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* GRID */
+.grid{
+  position:relative;z-index:1;
+  max-width:1240px;margin:0 auto;
+  padding:2.5rem 2rem 8rem;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:1.75rem;
+}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+
+/* CARD */
+.card{
+  display:block;text-decoration:none;color:inherit;
+  position:relative;overflow:hidden;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:28px;padding:2.75rem 2.25rem;
+  cursor:pointer;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s,border-color .3s;
+  animation:fadeUp .6s ease backwards;
+}
+.card:nth-child(1){animation-delay:.08s}
+.card:nth-child(2){animation-delay:.16s}
+.card:nth-child(3){animation-delay:.24s}
+.card:nth-child(4){animation-delay:.32s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+.card-glow{
+  position:absolute;width:220px;height:220px;border-radius:50%;
+  right:-60px;top:-60px;filter:blur(70px);opacity:.12;
+  transition:opacity .4s,transform .4s;pointer-events:none;
+}
+.card:hover .card-glow{opacity:.28;transform:scale(1.3)}
+.card:hover{transform:translateY(-9px) scale(1.01)}
+
+/* per-card colours */
+.coin{--a:#f59e0b;--ag:rgba(245,158,11,.18);--as:rgba(245,158,11,.35)}
+.coin .card-glow{background:#f59e0b}
+.coin:hover{border-color:rgba(245,158,11,.45);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px var(--as)}
+
+.roul{--a:#ec4899;--ag:rgba(236,72,153,.18);--as:rgba(236,72,153,.35)}
+.roul .card-glow{background:#ec4899}
+.roul:hover{border-color:rgba(236,72,153,.45);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px var(--as)}
+
+.dice{--a:#22d3ee;--ag:rgba(34,211,238,.18);--as:rgba(34,211,238,.35)}
+.dice .card-glow{background:#22d3ee}
+.dice:hover{border-color:rgba(34,211,238,.45);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px var(--as)}
+
+.amida{--a:#34d399;--ag:rgba(52,211,153,.18);--as:rgba(52,211,153,.35)}
+.amida .card-glow{background:#34d399}
+.amida:hover{border-color:rgba(52,211,153,.45);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 50px var(--as)}
+
+.icon-box{
+  width:90px;height:90px;border-radius:22px;margin-bottom:1.75rem;
+  background:color-mix(in srgb,var(--a) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--a) 25%,transparent);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.icon-box svg{width:52px;height:52px}
+.num-badge{
+  position:absolute;top:-8px;right:-8px;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--a);color:#fff;
+  font-size:.65rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+}
+.c-tag{
+  display:inline-block;padding:.18rem .65rem;border-radius:20px;margin-bottom:.7rem;
+  background:color-mix(in srgb,var(--a) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--a) 28%,transparent);
+  color:var(--a);font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+}
+.c-en{display:block;font-size:.8rem;color:var(--a);font-weight:600;letter-spacing:.2em;margin-bottom:.3rem}
+.c-title{font-size:1.85rem;font-weight:800;margin-bottom:.65rem;line-height:1}
+.c-desc{color:var(--muted);font-size:.92rem;line-height:1.7;margin-bottom:1.75rem}
+.c-btn{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.7rem 1.6rem;border-radius:50px;
+  background:var(--a);color:#fff;font-weight:700;font-size:.88rem;letter-spacing:.05em;
+  transition:all .3s;box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.card:hover .c-btn{transform:scale(1.06);box-shadow:0 6px 30px var(--as)}
+.c-btn svg{width:15px;height:15px;transition:transform .3s}
+.card:hover .c-btn svg{transform:translateX(4px)}
+
+/* FOOTER */
+footer{
+  position:relative;z-index:1;
+  text-align:center;padding:2.5rem;
+  border-top:1px solid var(--border);
+  color:var(--muted);font-size:.82rem;letter-spacing:.05em;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<header>
+  <div class="h-logo">✦ RANDOM PICKER</div>
+  <div class="h-badge">TOOLS · 4</div>
+</header>
+
+<section class="hero">
+  <h1 class="hero-title">
+    <span class="hero-en">Decide by chance</span>
+    RANDOM<br>PICKER
+  </h1>
+  <p class="hero-desc">コイントスからルーレットまで。<br>すべての迷いに、確率の答えを。</p>
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<div class="section-head">
+  <div class="s-label">TOOLS</div>
+  <h2 class="s-title">ツールを選んでください</h2>
+</div>
+
+<section class="grid">
+
+  <!-- COIN TOSS -->
+  <a class="card coin" href="coin/">
+    <div class="card-glow"></div>
+    <div class="icon-box">
+      <div class="num-badge">01</div>
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cg1" cx="38%" cy="32%">
+            <stop offset="0%" stop-color="#fde68a"/>
+            <stop offset="55%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#92400e"/>
+          </radialGradient>
+        </defs>
+        <circle cx="26" cy="26" r="22" fill="url(#cg1)"/>
+        <circle cx="26" cy="26" r="17" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.2"/>
+        <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"/>
+        <text x="26" y="32" text-anchor="middle" font-size="16" font-weight="900" fill="rgba(255,255,255,.92)" font-family="serif">¥</text>
+        <!-- shine -->
+        <ellipse cx="19" cy="17" rx="5" ry="3" fill="rgba(255,255,255,.25)" transform="rotate(-30 19 17)"/>
+      </svg>
+    </div>
+    <div class="c-tag">COIN TOSS</div>
+    <h3 class="c-title"><span class="c-en">Coin Toss</span>コイントス</h3>
+    <p class="c-desc">コインを投げて表か裏かを決めます。<br>シンプルな2択の決断に最適。</p>
+    <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+  </a>
+
+  <!-- ROULETTE -->
+  <a class="card roul" href="roulette/">
+    <div class="card-glow"></div>
+    <div class="icon-box">
+      <div class="num-badge">02</div>
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#fce7f3"/><stop offset="100%" stop-color="#9d174d"/></radialGradient>
+        </defs>
+        <circle cx="26" cy="26" r="22" fill="rgba(236,72,153,.15)" stroke="#ec4899" stroke-width="1.2"/>
+        <path d="M26 26 L26 4 A22 22 0 0 1 45.1 15Z" fill="#ec4899" opacity=".85"/>
+        <path d="M26 26 L45.1 15 A22 22 0 0 1 45.1 37Z" fill="#9d174d" opacity=".85"/>
+        <path d="M26 26 L45.1 37 A22 22 0 0 1 26 48Z" fill="#ec4899" opacity=".85"/>
+        <path d="M26 26 L26 48 A22 22 0 0 1 6.9 37Z" fill="#9d174d" opacity=".85"/>
+        <path d="M26 26 L6.9 37 A22 22 0 0 1 6.9 15Z" fill="#ec4899" opacity=".85"/>
+        <path d="M26 26 L6.9 15 A22 22 0 0 1 26 4Z" fill="#9d174d" opacity=".85"/>
+        <circle cx="26" cy="26" r="6" fill="#0d0d24" stroke="#ec4899" stroke-width="1.2"/>
+        <polygon points="26,2 23,8 29,8" fill="#fbbf24"/>
+      </svg>
+    </div>
+    <div class="c-tag">ROULETTE</div>
+    <h3 class="c-title"><span class="c-en">Roulette</span>ルーレット</h3>
+    <p class="c-desc">項目を自由に追加してルーレットを回し、<br>ランダムに1つを選びます。</p>
+    <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+  </a>
+
+  <!-- DICE -->
+  <a class="card dice" href="dice/">
+    <div class="card-glow"></div>
+    <div class="icon-box">
+      <div class="num-badge">03</div>
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="dg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#164e63"/><stop offset="100%" stop-color="#0c3a4e"/></linearGradient>
+          <linearGradient id="dg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity=".35"/><stop offset="100%" stop-color="#0891b2" stop-opacity=".2"/></linearGradient>
+          <linearGradient id="dg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0891b2" stop-opacity=".25"/><stop offset="100%" stop-color="#164e63" stop-opacity=".15"/></linearGradient>
+        </defs>
+        <!-- front face -->
+        <rect x="12" y="18" width="28" height="28" rx="5" fill="url(#dg1)" stroke="#22d3ee" stroke-width="1.2"/>
+        <!-- top face -->
+        <path d="M12 18 L26 10 L40 18 L26 26Z" fill="url(#dg2)" stroke="#22d3ee" stroke-width="1.2"/>
+        <!-- right face -->
+        <path d="M40 18 L40 46 L26 54 L26 26Z" fill="url(#dg3)" stroke="#22d3ee" stroke-width="1.2"/>
+        <!-- dots on front (showing 5) -->
+        <circle cx="19" cy="26" r="2.2" fill="#22d3ee" opacity=".9"/>
+        <circle cx="26" cy="32" r="2.2" fill="#22d3ee" opacity=".9"/>
+        <circle cx="33" cy="26" r="2.2" fill="#22d3ee" opacity=".9"/>
+        <circle cx="19" cy="38" r="2.2" fill="#22d3ee" opacity=".9"/>
+        <circle cx="33" cy="38" r="2.2" fill="#22d3ee" opacity=".9"/>
+      </svg>
+    </div>
+    <div class="c-tag">DICE ROLL</div>
+    <h3 class="c-title"><span class="c-en">Dice Roll</span>ダイスロール</h3>
+    <p class="c-desc">1〜6個のサイコロを振ります。<br>RPGや様々な決定に活用できます。</p>
+    <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+  </a>
+
+  <!-- AMIDA -->
+  <a class="card amida" href="amida/">
+    <div class="card-glow"></div>
+    <div class="icon-box">
+      <div class="num-badge">04</div>
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- vertical lines -->
+        <line x1="13" y1="6" x2="13" y2="46" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="26" y1="6" x2="26" y2="46" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="39" y1="6" x2="39" y2="46" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- rungs -->
+        <line x1="13" y1="16" x2="26" y2="16" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="26" y1="27" x2="39" y2="27" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="13" y1="38" x2="26" y2="38" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- top dots -->
+        <circle cx="13" cy="6" r="3.5" fill="#34d399"/>
+        <circle cx="26" cy="6" r="3.5" fill="#34d399"/>
+        <circle cx="39" cy="6" r="3.5" fill="#34d399"/>
+        <!-- bottom dots -->
+        <circle cx="13" cy="46" r="3.5" fill="none" stroke="#34d399" stroke-width="1.5"/>
+        <circle cx="26" cy="46" r="3.5" fill="none" stroke="#34d399" stroke-width="1.5"/>
+        <circle cx="39" cy="46" r="3.5" fill="none" stroke="#34d399" stroke-width="1.5"/>
+        <!-- animated highlight path -->
+        <line x1="26" y1="6" x2="26" y2="27" stroke="#a7f3d0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        <line x1="26" y1="27" x2="39" y2="27" stroke="#a7f3d0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        <line x1="39" y1="27" x2="39" y2="46" stroke="#a7f3d0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+      </svg>
+    </div>
+    <div class="c-tag">AMIDA LOTTERY</div>
+    <h3 class="c-title"><span class="c-en">Amida Lottery</span>あみだくじ</h3>
+    <p class="c-desc">おなじみのあみだくじをデジタルで。<br>参加者の名前を入力してスタート。</p>
+    <span class="c-btn">PLAY <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+  </a>
+
+</section>
+
+<footer>RANDOM PICKER &copy; 2025 — Made with ✦ and randomness</footer>
+
+<script>
+(function(){
+  const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+  let W,H,pts=[];
+  const COLS=['#a78bfa','#f472b6','#22d3ee','#fbbf24','#34d399'];
+  function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}
+  function mkPt(){return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*1.4+.3,a:Math.random()*.6+.1,da:(Math.random()-.5)*.005,c:COLS[Math.floor(Math.random()*5)]}}
+  resize();
+  for(let i=0;i<180;i++)pts.push(mkPt());
+
+  /* shooting stars */
+  function shoot(){
+    let x=Math.random()*W,y=Math.random()*H*.5,len=80+Math.random()*130,prog=0,spd=7+Math.random()*7,ang=Math.PI*.22+(Math.random()-.5)*.4;
+    function f(){prog+=spd;if(prog>len+80)return;
+      ctx.save();ctx.translate(x,y);ctx.rotate(ang);
+      const tail=Math.min(prog,len);
+      const gr=ctx.createLinearGradient(-prog,0,-prog+tail,0);
+      gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(255,255,255,.85)');
+      ctx.beginPath();ctx.moveTo(-prog,0);ctx.lineTo(-prog+tail,0);
+      ctx.strokeStyle=gr;ctx.lineWidth=1.8;ctx.stroke();ctx.restore();
+      requestAnimationFrame(f);}
+    f();}
+  setInterval(shoot,2800+Math.random()*2000);
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    /* radial ambient */
+    const bg=ctx.createRadialGradient(W/2,H*.4,0,W/2,H*.4,Math.max(W,H)*.7);
+    bg.addColorStop(0,'rgba(20,12,50,.25)');bg.addColorStop(1,'rgba(4,4,15,0)');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i];
+      p.x+=p.vx;p.y+=p.vy;p.a+=p.da;
+      if(p.a<.05){p.a=.05;p.da*=-1}if(p.a>.7){p.a=.7;p.da*=-1}
+      if(p.x<-8)p.x=W+8;if(p.x>W+8)p.x=-8;
+      if(p.y<-8)p.y=H+8;if(p.y>H+8)p.y=-8;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.c;ctx.globalAlpha=p.a;ctx.fill();ctx.globalAlpha=1;
+    }
+    /* connections */
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<95){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(167,139,250,${.055*(1-d/95)})`;ctx.lineWidth=.5;ctx.stroke();}
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',resize);
+})();
+</script>
+</body>
+</html>

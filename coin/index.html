@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>コイントス — RANDOM PICKER</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#04040f;--gold:#f59e0b;--silver:#94a3b8;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+
+/* NAV */
+nav{width:100%;padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);background:rgba(4,4,15,.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.back{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;text-decoration:none;transition:color .2s}
+.back:hover{color:var(--text)}
+.back svg{width:16px;height:16px}
+.nav-title{font-weight:800;font-size:1rem;color:var(--gold);letter-spacing:.05em}
+
+/* AMBIENT GLOW */
+.glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.glow-bg::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.12),transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);animation:pulse 4s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.6;transform:translate(-50%,-60%) scale(1)}to{opacity:1;transform:translate(-50%,-60%) scale(1.15)}}
+
+/* MAIN */
+main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;gap:2.5rem;width:100%;max-width:600px}
+
+.page-title{text-align:center}
+.page-title h1{font-size:2.5rem;font-weight:900;letter-spacing:-.02em}
+.page-title h1 span{background:linear-gradient(135deg,#fde68a,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-title p{color:var(--muted);font-size:.9rem;margin-top:.4rem;letter-spacing:.05em}
+
+/* 3D COIN */
+.scene{width:220px;height:220px;perspective:700px;cursor:pointer;user-select:none}
+.coin{
+  width:100%;height:100%;position:relative;transform-style:preserve-3d;
+  transition:transform 2.4s cubic-bezier(.2,.6,.35,1);
+  filter:drop-shadow(0 0 30px rgba(245,158,11,.4));
+}
+.coin.idle{animation:float 3.5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:rotateY(0deg) translateY(0)}50%{transform:rotateY(15deg) translateY(-12px)}}
+.coin.spinning{animation:none!important}
+.face,.back{
+  position:absolute;width:100%;height:100%;border-radius:50%;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.back{transform:rotateY(180deg)}
+
+/* coin rim */
+.face::before,.back::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(255,255,255,.08),rgba(255,255,255,.02),rgba(255,255,255,.08),rgba(255,255,255,.02),rgba(255,255,255,.08));
+}
+
+/* STATS */
+.stats{
+  display:flex;gap:2.5rem;align-items:center;justify-content:center;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:1.2rem 2.5rem;
+  font-size:1.5rem;font-weight:900;
+}
+.stat-h{color:var(--gold)}
+.stat-t{color:var(--silver)}
+.stat-sep{color:var(--muted);font-size:1.2rem}
+.stat-label{display:block;font-size:.65rem;font-weight:500;color:var(--muted);letter-spacing:.15em;text-align:center;margin-top:.2rem}
+
+/* RESULT DISPLAY */
+.result-area{
+  min-height:3.5rem;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+}
+.result-label{
+  font-size:2rem;font-weight:900;letter-spacing:.05em;
+  opacity:0;transform:scale(.6);transition:all .4s cubic-bezier(.34,1.56,.64,1);
+}
+.result-label.show{opacity:1;transform:scale(1)}
+.result-label.heads{color:var(--gold);text-shadow:0 0 30px rgba(245,158,11,.7)}
+.result-label.tails{color:var(--silver);text-shadow:0 0 30px rgba(148,163,184,.7)}
+.result-jp{font-size:1rem;color:var(--muted);opacity:0;transition:opacity .4s .2s}
+.result-label.show~.result-jp{opacity:1}
+
+/* BUTTON */
+.toss-btn{
+  padding:1rem 3.5rem;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#fbbf24,#f59e0b,#d97706);
+  color:#1c0a00;font-size:1.15rem;font-weight:900;letter-spacing:.12em;
+  text-transform:uppercase;
+  box-shadow:0 4px 30px rgba(245,158,11,.5),0 0 0 0 rgba(245,158,11,.4);
+  transition:all .25s;
+  animation:btnPulse 2.5s ease-in-out infinite;
+}
+@keyframes btnPulse{0%,100%{box-shadow:0 4px 30px rgba(245,158,11,.4),0 0 0 0 rgba(245,158,11,.25)}50%{box-shadow:0 6px 40px rgba(245,158,11,.6),0 0 0 12px rgba(245,158,11,0)}}
+.toss-btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 40px rgba(245,158,11,.7)}
+.toss-btn:active{transform:translateY(0) scale(.97)}
+.toss-btn:disabled{opacity:.5;cursor:not-allowed;animation:none;transform:none}
+
+/* HISTORY */
+.history{display:flex;flex-direction:column;align-items:center;gap:.75rem;width:100%}
+.history-label{font-size:.72rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
+.history-dots{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.dot{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:700;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  animation:dotPop .4s cubic-bezier(.34,1.56,.64,1) backwards;
+}
+@keyframes dotPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.dot.H{background:rgba(245,158,11,.2);border:2px solid var(--gold);color:var(--gold)}
+.dot.T{background:rgba(148,163,184,.12);border:2px solid var(--silver);color:var(--silver)}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+
+<nav>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    TOP
+  </a>
+  <span class="nav-title">✦ COIN TOSS</span>
+</nav>
+
+<main>
+  <div class="page-title">
+    <h1><span>コイントス</span></h1>
+    <p>COIN TOSS — TAP THE COIN OR BUTTON</p>
+  </div>
+
+  <!-- 3D Coin -->
+  <div class="scene" id="scene" onclick="toss()">
+    <div class="coin idle" id="coin">
+      <!-- HEADS face -->
+      <div class="face">
+        <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="hg" cx="38%" cy="32%">
+              <stop offset="0%" stop-color="#fef3c7"/>
+              <stop offset="40%" stop-color="#fbbf24"/>
+              <stop offset="75%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#92400e"/>
+            </radialGradient>
+            <radialGradient id="hinner" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#fde68a" stop-opacity=".3"/>
+              <stop offset="100%" stop-color="#b45309" stop-opacity=".1"/>
+            </radialGradient>
+            <filter id="glow1"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- outer coin -->
+          <circle cx="110" cy="110" r="106" fill="url(#hg)"/>
+          <!-- rim detail -->
+          <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/>
+          <!-- inner ring -->
+          <circle cx="110" cy="110" r="88" fill="url(#hinner)" stroke="rgba(255,200,50,.35)" stroke-width="1.5"/>
+          <!-- decorative pattern -->
+          <circle cx="110" cy="110" r="72" fill="none" stroke="rgba(255,200,50,.2)" stroke-width="1" stroke-dasharray="4 3"/>
+          <!-- cherry blossom petals -->
+          <g filter="url(#glow1)">
+            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(0 110 110)"/>
+            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(72 110 110)"/>
+            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(144 110 110)"/>
+            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(216 110 110)"/>
+            <ellipse cx="110" cy="72" rx="9" ry="15" fill="rgba(255,200,180,.7)" transform="rotate(288 110 110)"/>
+          </g>
+          <!-- center yen symbol -->
+          <text x="110" y="122" text-anchor="middle" font-size="56" font-weight="900" fill="rgba(180,90,0,.9)" font-family="serif" filter="url(#glow1)">¥</text>
+          <!-- HEADS text -->
+          <text x="110" y="175" text-anchor="middle" font-size="13" font-weight="700" fill="rgba(180,90,0,.7)" letter-spacing="5" font-family="sans-serif">HEADS</text>
+          <!-- shine overlay -->
+          <ellipse cx="82" cy="70" rx="28" ry="14" fill="rgba(255,255,255,.22)" transform="rotate(-30 82 70)"/>
+        </svg>
+      </div>
+      <!-- TAILS face -->
+      <div class="back">
+        <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="tg" cx="38%" cy="32%">
+              <stop offset="0%" stop-color="#f1f5f9"/>
+              <stop offset="45%" stop-color="#cbd5e1"/>
+              <stop offset="80%" stop-color="#94a3b8"/>
+              <stop offset="100%" stop-color="#334155"/>
+            </radialGradient>
+            <radialGradient id="tinner" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#e2e8f0" stop-opacity=".3"/>
+              <stop offset="100%" stop-color="#475569" stop-opacity=".1"/>
+            </radialGradient>
+            <filter id="glow2"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <circle cx="110" cy="110" r="106" fill="url(#tg)"/>
+          <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+          <circle cx="110" cy="110" r="88" fill="url(#tinner)" stroke="rgba(200,220,240,.3)" stroke-width="1.5"/>
+          <circle cx="110" cy="110" r="72" fill="none" stroke="rgba(200,220,240,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+          <!-- star pattern -->
+          <g filter="url(#glow2)">
+            <polygon points="110,70 114,100 142,100 120,118 128,148 110,130 92,148 100,118 78,100 106,100" fill="rgba(200,220,255,.65)" transform="scale(.7) translate(47,47)"/>
+          </g>
+          <!-- large star -->
+          <g filter="url(#glow2)" transform="translate(110,105)">
+            <polygon points="0,-38 8,-14 34,-14 14,4 22,30 0,14 -22,30 -14,4 -34,-14 -8,-14" fill="rgba(180,200,230,.8)"/>
+          </g>
+          <text x="110" y="175" text-anchor="middle" font-size="13" font-weight="700" fill="rgba(80,110,150,.75)" letter-spacing="5" font-family="sans-serif">TAILS</text>
+          <ellipse cx="82" cy="70" rx="28" ry="14" fill="rgba(255,255,255,.2)" transform="rotate(-30 82 70)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-area">
+    <div class="result-label" id="result-label"></div>
+    <div class="result-jp" id="result-jp"></div>
+  </div>
+
+  <button class="toss-btn" id="toss-btn" onclick="toss()">TOSS!</button>
+
+  <div class="stats">
+    <div>
+      <span class="stat-h" id="h-count">0</span>
+      <span class="stat-label">HEADS / 表</span>
+    </div>
+    <span class="stat-sep">·</span>
+    <div>
+      <span class="stat-t" id="t-count">0</span>
+      <span class="stat-label">TAILS / 裏</span>
+    </div>
+  </div>
+
+  <div class="history">
+    <div class="history-label">履歴 HISTORY</div>
+    <div class="history-dots" id="dots"></div>
+  </div>
+</main>
+
+<script>
+const coin = document.getElementById('coin');
+const resultLabel = document.getElementById('result-label');
+const resultJp = document.getElementById('result-jp');
+const btn = document.getElementById('toss-btn');
+const dotsEl = document.getElementById('dots');
+let hCount = 0, tCount = 0;
+let spinning = false;
+const history = [];
+
+function toss() {
+  if (spinning) return;
+  spinning = true;
+  btn.disabled = true;
+
+  const isHeads = Math.random() < .5;
+
+  // Remove idle float animation
+  coin.classList.remove('idle');
+  coin.classList.add('spinning');
+
+  // Reset instantly
+  coin.style.transition = 'none';
+  coin.style.transform = 'rotateY(0deg)';
+  void coin.offsetWidth; // force reflow
+
+  // Animate: 5 full spins + result angle
+  const spins = 5;
+  const finalAngle = isHeads ? spins * 360 : spins * 360 + 180;
+  coin.style.transition = 'transform 2.4s cubic-bezier(.2,.6,.35,1)';
+  coin.style.transform = `rotateY(${finalAngle}deg)`;
+
+  // Hide result during spin
+  resultLabel.classList.remove('show');
+
+  setTimeout(() => {
+    // Reset to canonical position without animation
+    coin.style.transition = 'none';
+    coin.style.transform = isHeads ? 'rotateY(0deg)' : 'rotateY(180deg)';
+    coin.classList.remove('spinning');
+    coin.classList.add('idle');
+
+    // Show result
+    resultLabel.textContent = isHeads ? '表 — HEADS' : '裏 — TAILS';
+    resultJp.textContent = isHeads ? '表が出ました！' : '裏が出ました！';
+    resultLabel.className = 'result-label show ' + (isHeads ? 'heads' : 'tails');
+
+    // Update stats
+    if (isHeads) { hCount++; document.getElementById('h-count').textContent = hCount; }
+    else { tCount++; document.getElementById('t-count').textContent = tCount; }
+
+    // Update history (max 12)
+    const mark = isHeads ? 'H' : 'T';
+    history.push(mark);
+    if (history.length > 12) history.shift();
+    renderDots();
+
+    spinning = false;
+    btn.disabled = false;
+  }, 2500);
+}
+
+function renderDots() {
+  dotsEl.innerHTML = '';
+  history.forEach((m, i) => {
+    const d = document.createElement('div');
+    d.className = `dot ${m}`;
+    d.textContent = m;
+    d.style.animationDelay = '0s';
+    dotsEl.appendChild(d);
+  });
+}
+</script>
+</body>
+</html>

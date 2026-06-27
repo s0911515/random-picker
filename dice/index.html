@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ダイスロール — RANDOM PICKER</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#04040f;--cyan:#22d3ee;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+
+nav{width:100%;padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);background:rgba(4,4,15,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.back{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;text-decoration:none;transition:color .2s}.back:hover{color:var(--text)}.back svg{width:16px;height:16px}
+.nav-title{font-weight:800;font-size:1rem;color:var(--cyan);letter-spacing:.05em}
+
+.glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.glow-bg::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.09),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 5s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.5;transform:translate(-50%,-50%) scale(1)}to{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+
+main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;padding:2.5rem 2rem;gap:2.5rem;width:100%;max-width:760px}
+
+.page-title{text-align:center}
+.page-title h1{font-size:2.2rem;font-weight:900}
+.page-title h1 span{background:linear-gradient(135deg,#67e8f9,#22d3ee,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-title p{color:var(--muted);font-size:.82rem;margin-top:.3rem;letter-spacing:.08em}
+
+/* DICE COUNT SELECTOR */
+.count-ctrl{
+  display:flex;align-items:center;gap:1.5rem;
+  background:var(--glass);border:1px solid var(--border);border-radius:50px;padding:.8rem 2rem;
+}
+.count-btn{
+  width:36px;height:36px;border-radius:50%;border:1px solid rgba(34,211,238,.35);
+  background:transparent;color:var(--cyan);font-size:1.4rem;font-weight:300;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.count-btn:hover{background:rgba(34,211,238,.15);border-color:var(--cyan)}
+.count-num{font-size:1.8rem;font-weight:900;color:var(--cyan);min-width:2rem;text-align:center}
+.count-label{font-size:.75rem;color:var(--muted);letter-spacing:.1em}
+
+/* DICE GRID */
+.dice-grid{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;
+  min-height:200px;align-items:center;padding:1rem;
+}
+
+/* 3D DIE */
+.die-wrap{perspective:320px;width:110px;height:110px}
+.die{
+  width:110px;height:110px;
+  position:relative;transform-style:preserve-3d;
+  transform:rotateX(-20deg) rotateY(25deg);
+  transition:transform 1.5s cubic-bezier(.2,.6,.3,1);
+  filter:drop-shadow(0 4px 20px rgba(34,211,238,.3));
+}
+.die.rolling{
+  animation:shake .15s ease-in-out infinite;
+}
+@keyframes shake{0%,100%{transform:rotateX(-20deg) rotateY(25deg) translate(0,0)}25%{transform:rotateX(-20deg) rotateY(25deg) translate(-3px,3px)}75%{transform:rotateX(-20deg) rotateY(25deg) translate(3px,-3px)}}
+
+.face{
+  position:absolute;
+  width:110px;height:110px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#0f2040,#0a1830);
+  border:1.5px solid rgba(34,211,238,.45);
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  padding:14px;gap:0;
+  place-items:center;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:inset 0 0 20px rgba(34,211,238,.05);
+}
+.face-1{transform:translateZ(55px)}
+.face-6{transform:rotateY(180deg) translateZ(55px)}
+.face-3{transform:rotateY(90deg) translateZ(55px)}
+.face-4{transform:rotateY(-90deg) translateZ(55px)}
+.face-5{transform:rotateX(90deg) translateZ(55px)}
+.face-2{transform:rotateX(-90deg) translateZ(55px)}
+
+.pip{
+  width:14px;height:14px;border-radius:50%;
+  background:#22d3ee;
+  box-shadow:0 0 8px #22d3ee,0 0 16px rgba(34,211,238,.5);
+}
+.pip.off{visibility:hidden}
+
+/* SUM DISPLAY */
+.sum-area{text-align:center}
+.sum-num{
+  font-size:5rem;font-weight:900;
+  background:linear-gradient(135deg,#67e8f9,#22d3ee);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(34,211,238,.5));
+  line-height:1;
+  transition:all .3s;
+}
+.sum-label{font-size:.78rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:.3rem}
+
+/* INDIVIDUAL VALUES */
+.ind-vals{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  min-height:1.5rem;
+}
+.ind-val{
+  padding:.2rem .6rem;border-radius:8px;
+  background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.25);
+  font-size:.85rem;font-weight:700;color:var(--cyan);
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1) backwards;
+}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ROLL BUTTON */
+.roll-btn{
+  padding:1rem 3.5rem;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#67e8f9,#22d3ee,#0891b2);
+  color:#011827;font-size:1.1rem;font-weight:900;letter-spacing:.12em;
+  box-shadow:0 4px 30px rgba(34,211,238,.45);
+  transition:all .25s;animation:btnGlow 2.5s ease-in-out infinite;
+}
+@keyframes btnGlow{0%,100%{box-shadow:0 4px 30px rgba(34,211,238,.35),0 0 0 0 rgba(34,211,238,.2)}50%{box-shadow:0 6px 40px rgba(34,211,238,.6),0 0 0 10px rgba(34,211,238,0)}}
+.roll-btn:hover{transform:translateY(-3px) scale(1.04)}
+.roll-btn:disabled{opacity:.45;cursor:not-allowed;animation:none;transform:none}
+
+/* HISTORY */
+.hist-area{width:100%;max-width:500px;text-align:center}
+.hist-label{font-size:.72rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.75rem}
+.hist-rows{display:flex;flex-direction:column;gap:.4rem;max-height:200px;overflow-y:auto;padding:.25rem}
+.hist-rows::-webkit-scrollbar{width:4px}.hist-rows::-webkit-scrollbar-thumb{background:rgba(34,211,238,.3);border-radius:2px}
+.hist-row{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.4rem .75rem;border-radius:10px;
+  background:var(--glass);border:1px solid var(--border);
+  font-size:.82rem;animation:fadeIn .3s ease backwards;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+.hist-dice{display:flex;gap:.3rem}
+.hist-d{
+  width:22px;height:22px;border-radius:5px;
+  background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);
+  color:var(--cyan);font-size:.75rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.hist-sum{margin-left:auto;font-weight:700;color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+
+<nav>
+  <a class="back" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>TOP</a>
+  <span class="nav-title">✦ DICE ROLL</span>
+</nav>
+
+<main>
+  <div class="page-title">
+    <h1><span>ダイスロール</span></h1>
+    <p>DICE ROLL — ROLL THE DICE</p>
+  </div>
+
+  <div class="count-ctrl">
+    <button class="count-btn" onclick="changeCount(-1)">−</button>
+    <div>
+      <div class="count-num" id="count-num">2</div>
+      <div class="count-label">DICE / 個</div>
+    </div>
+    <button class="count-btn" onclick="changeCount(1)">＋</button>
+  </div>
+
+  <div class="dice-grid" id="dice-grid"></div>
+
+  <div class="sum-area">
+    <div class="sum-num" id="sum-num">—</div>
+    <div class="sum-label">TOTAL SUM / 合計</div>
+  </div>
+
+  <div class="ind-vals" id="ind-vals"></div>
+
+  <button class="roll-btn" id="roll-btn" onclick="rollAll()">ROLL!</button>
+
+  <div class="hist-area">
+    <div class="hist-label">履歴 HISTORY</div>
+    <div class="hist-rows" id="hist-rows"></div>
+  </div>
+</main>
+
+<script>
+/* ---- CONSTANTS ---- */
+// pip grid positions (3x3, 0..8):
+// 0 1 2
+// 3 4 5
+// 6 7 8
+const PIPS = {
+  1: [4],
+  2: [2, 6],
+  3: [2, 4, 6],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8],
+};
+
+// Die rotation to show face N towards viewer (front = face-1 at z+)
+// Standard die: 1-6 opposite, 2-5 opposite, 3-4 opposite
+const FACE_ROT = {
+  1: { x: 0, y: 0 },
+  6: { x: 0, y: 180 },
+  2: { x: 90, y: 0 },
+  5: { x: -90, y: 0 },
+  3: { x: 0, y: -90 },
+  4: { x: 0, y: 90 },
+};
+
+let diceCount = 2;
+let rolling = false;
+const history = [];
+
+function changeCount(d) {
+  const n = diceCount + d;
+  if (n < 1 || n > 6) return;
+  diceCount = n;
+  document.getElementById('count-num').textContent = n;
+  buildDice();
+  document.getElementById('sum-num').textContent = '—';
+  document.getElementById('ind-vals').innerHTML = '';
+}
+
+function buildDice() {
+  const grid = document.getElementById('dice-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < diceCount; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'die-wrap';
+    const die = document.createElement('div');
+    die.className = 'die';
+    die.id = `die-${i}`;
+    // Build 6 faces
+    for (let v = 1; v <= 6; v++) {
+      const face = document.createElement('div');
+      face.className = `face face-${v}`;
+      // 3x3 grid of pip slots
+      for (let slot = 0; slot < 9; slot++) {
+        const pip = document.createElement('div');
+        pip.className = 'pip' + (PIPS[v].includes(slot) ? '' : ' off');
+        face.appendChild(pip);
+      }
+      die.appendChild(face);
+    }
+    wrap.appendChild(die);
+    grid.appendChild(wrap);
+    // Set initial random orientation
+    setDieFace(i, Math.ceil(Math.random() * 6), false);
+  }
+}
+
+function setDieFace(idx, value, animate) {
+  const die = document.getElementById(`die-${idx}`);
+  if (!die) return;
+  const { x, y } = FACE_ROT[value];
+  if (!animate) {
+    die.style.transition = 'none';
+    die.style.transform = `rotateX(${x - 20}deg) rotateY(${y + 25}deg)`;
+  } else {
+    // Add full spins for drama
+    const spinsX = (2 + Math.floor(Math.random() * 2)) * 360;
+    const spinsY = (2 + Math.floor(Math.random() * 2)) * 360;
+    die.style.transition = 'none';
+    die.style.transform = `rotateX(-20deg) rotateY(25deg)`;
+    void die.offsetWidth;
+    die.style.transition = `transform ${1.0 + idx * .1}s cubic-bezier(.2,.6,.3,1)`;
+    die.style.transform = `rotateX(${spinsX + x - 20}deg) rotateY(${spinsY + y + 25}deg)`;
+  }
+}
+
+function rollAll() {
+  if (rolling) return;
+  rolling = true;
+  document.getElementById('roll-btn').disabled = true;
+
+  // Add shake animation
+  for (let i = 0; i < diceCount; i++) {
+    const die = document.getElementById(`die-${i}`);
+    if (die) { die.style.transition = 'none'; die.classList.add('rolling'); }
+  }
+
+  // Pick results
+  const results = Array.from({ length: diceCount }, () => Math.ceil(Math.random() * 6));
+
+  // Shake for a bit, then animate to result
+  setTimeout(() => {
+    for (let i = 0; i < diceCount; i++) {
+      const die = document.getElementById(`die-${i}`);
+      if (die) die.classList.remove('rolling');
+      setDieFace(i, results[i], true);
+    }
+
+    setTimeout(() => {
+      const sum = results.reduce((a, b) => a + b, 0);
+      document.getElementById('sum-num').textContent = sum;
+
+      const indVals = document.getElementById('ind-vals');
+      indVals.innerHTML = '';
+      results.forEach((v, i) => {
+        const span = document.createElement('span');
+        span.className = 'ind-val';
+        span.textContent = `🎲 ${v}`;
+        span.style.animationDelay = `${i * .06}s`;
+        indVals.appendChild(span);
+      });
+
+      // History
+      history.unshift({ results, sum });
+      if (history.length > 8) history.pop();
+      renderHistory();
+
+      rolling = false;
+      document.getElementById('roll-btn').disabled = false;
+    }, 1200);
+  }, 600);
+}
+
+function renderHistory() {
+  const el = document.getElementById('hist-rows');
+  el.innerHTML = '';
+  history.forEach((h, i) => {
+    const row = document.createElement('div');
+    row.className = 'hist-row';
+    row.style.animationDelay = `${i * .04}s`;
+    const dicesHtml = h.results.map(v => `<span class="hist-d">${v}</span>`).join('');
+    row.innerHTML = `<div class="hist-dice">${dicesHtml}</div><span class="hist-sum">Σ ${h.sum}</span>`;
+    el.appendChild(row);
+  });
+}
+
+buildDice();
+</script>
+</body>
+</html>

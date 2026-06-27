@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ルーレット — RANDOM PICKER</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#04040f;--pink:#ec4899;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+/* NAV */
+nav{padding:1.2rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);background:rgba(4,4,15,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.back{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;text-decoration:none;transition:color .2s}.back:hover{color:var(--text)}.back svg{width:16px;height:16px}
+.nav-title{font-weight:800;font-size:1rem;color:var(--pink);letter-spacing:.05em}
+
+/* GLOW */
+.glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.glow-bg::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,.1),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 5s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.5;transform:translate(-50%,-50%) scale(1)}to{opacity:1;transform:translate(-50%,-50%) scale(1.2)}}
+
+/* LAYOUT */
+.layout{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1fr 340px;gap:2rem;padding:2rem;max-width:1000px;margin:0 auto;width:100%;align-items:start}
+@media(max-width:780px){.layout{grid-template-columns:1fr;}}
+
+/* WHEEL AREA */
+.wheel-area{display:flex;flex-direction:column;align-items:center;gap:1.5rem}
+.page-title{text-align:center}
+.page-title h1{font-size:2rem;font-weight:900}
+.page-title h1 span{background:linear-gradient(135deg,#fce7f3,#ec4899,#be185d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-title p{color:var(--muted);font-size:.82rem;margin-top:.3rem;letter-spacing:.08em}
+
+.wheel-wrap{position:relative;width:380px;height:380px;max-width:90vw;max-height:90vw}
+#wcanvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 30px rgba(236,72,153,.35))}
+
+/* pointer */
+.pointer{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  width:0;height:0;
+  border-left:14px solid transparent;
+  border-right:14px solid transparent;
+  border-top:28px solid #fbbf24;
+  filter:drop-shadow(0 0 8px rgba(251,191,36,.8));
+  z-index:5;
+}
+
+/* SPIN BUTTON */
+.spin-btn{
+  padding:1rem 3rem;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#f472b6,#ec4899,#be185d);
+  color:#fff;font-size:1.1rem;font-weight:900;letter-spacing:.1em;
+  box-shadow:0 4px 30px rgba(236,72,153,.5);
+  transition:all .25s;animation:btnGlow 2.5s ease-in-out infinite;
+}
+@keyframes btnGlow{0%,100%{box-shadow:0 4px 30px rgba(236,72,153,.4),0 0 0 0 rgba(236,72,153,.2)}50%{box-shadow:0 6px 40px rgba(236,72,153,.65),0 0 0 10px rgba(236,72,153,0)}}
+.spin-btn:hover{transform:translateY(-3px) scale(1.04)}
+.spin-btn:disabled{opacity:.4;cursor:not-allowed;animation:none;transform:none}
+
+/* PANEL */
+.panel{
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:24px;padding:1.75rem;display:flex;flex-direction:column;gap:1.25rem;
+}
+.panel h2{font-size:1rem;font-weight:800;color:var(--pink);letter-spacing:.08em}
+
+.items-list{list-style:none;display:flex;flex-direction:column;gap:.5rem;max-height:340px;overflow-y:auto}
+.items-list::-webkit-scrollbar{width:4px}.items-list::-webkit-scrollbar-track{background:transparent}.items-list::-webkit-scrollbar-thumb{background:rgba(236,72,153,.3);border-radius:2px}
+.item-row{
+  display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;
+  border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);
+  animation:fadeIn .3s ease backwards;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.item-color{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+.item-text{flex:1;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:.1rem .25rem;transition:color .2s;line-height:1}.item-del:hover{color:#f87171}
+
+.add-row{display:flex;gap:.5rem}
+.add-input{
+  flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);
+  border-radius:10px;padding:.6rem .9rem;color:var(--text);font-size:.9rem;
+  outline:none;transition:border-color .2s;
+}
+.add-input:focus{border-color:var(--pink)}
+.add-input::placeholder{color:var(--muted)}
+.add-btn{
+  padding:.6rem 1rem;border-radius:10px;border:none;cursor:pointer;
+  background:var(--pink);color:#fff;font-weight:700;font-size:1rem;
+  transition:all .2s;
+}
+.add-btn:hover{background:#be185d}
+
+/* RESULT OVERLAY */
+.overlay{
+  position:fixed;inset:0;z-index:100;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(4,4,15,.85);backdrop-filter:blur(8px);
+}
+.overlay.show{display:flex}
+.result-card{
+  background:rgba(20,10,40,.9);border:1px solid rgba(236,72,153,.4);
+  border-radius:28px;padding:3rem 4rem;text-align:center;
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
+  position:relative;overflow:hidden;
+}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.result-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(236,72,153,.2),transparent 70%)}
+.result-label{font-size:.8rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.75rem}
+.result-winner{font-size:3rem;font-weight:900;color:var(--pink);text-shadow:0 0 40px rgba(236,72,153,.8);margin-bottom:.5rem}
+.result-sub{font-size:.9rem;color:var(--muted)}
+.close-btn{
+  margin-top:2rem;padding:.75rem 2rem;border-radius:50px;border:1px solid rgba(236,72,153,.4);
+  background:transparent;color:var(--pink);font-weight:700;cursor:pointer;font-size:.9rem;
+  transition:all .2s;
+}
+.close-btn:hover{background:rgba(236,72,153,.1)}
+
+/* confetti canvas */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:99}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<canvas id="confetti"></canvas>
+
+<nav>
+  <a class="back" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>TOP</a>
+  <span class="nav-title">✦ ROULETTE</span>
+</nav>
+
+<div class="layout">
+  <div class="wheel-area">
+    <div class="page-title">
+      <h1><span>ルーレット</span></h1>
+      <p>ROULETTE — SPIN TO DECIDE</p>
+    </div>
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="wcanvas" width="380" height="380"></canvas>
+    </div>
+    <button class="spin-btn" id="spin-btn" onclick="spin()">SPIN!</button>
+  </div>
+
+  <div class="panel">
+    <h2>ITEMS — 項目リスト</h2>
+    <ul class="items-list" id="items-list"></ul>
+    <div class="add-row">
+      <input class="add-input" id="add-input" type="text" placeholder="新しい項目を追加" maxlength="20" onkeydown="if(event.key==='Enter')addItem()"/>
+      <button class="add-btn" onclick="addItem()">＋</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeResult(event)">
+  <div class="result-card">
+    <div class="result-label">WINNER — 当選！</div>
+    <div class="result-winner" id="winner-text"></div>
+    <div class="result-sub" id="winner-sub"></div>
+    <button class="close-btn" onclick="closeOverlay()">もう一度 / AGAIN</button>
+  </div>
+</div>
+
+<script>
+const COLORS = [
+  '#ec4899','#f43f5e','#f97316','#f59e0b','#84cc16','#10b981',
+  '#06b6d4','#6366f1','#a855f7','#e879f9','#fb7185','#4ade80'
+];
+
+let items = ['チョコレート','バニラ','ストロベリー','マンゴー','抹茶','キャラメル'];
+let spinning = false;
+let angle = 0;
+let velocity = 0;
+let animId = null;
+let spinCount = 0;
+
+const canvas = document.getElementById('wcanvas');
+const ctx = canvas.getContext('2d');
+
+function renderList() {
+  const ul = document.getElementById('items-list');
+  ul.innerHTML = '';
+  items.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.className = 'item-row';
+    li.style.animationDelay = `${i * .04}s`;
+    li.innerHTML = `
+      <div class="item-color" style="background:${COLORS[i % COLORS.length]}"></div>
+      <span class="item-text">${escHtml(item)}</span>
+      <button class="item-del" onclick="removeItem(${i})">✕</button>`;
+    ul.appendChild(li);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addItem() {
+  const inp = document.getElementById('add-input');
+  const val = inp.value.trim();
+  if (!val || items.length >= 12) return;
+  items.push(val);
+  inp.value = '';
+  renderList();
+  drawWheel();
+}
+
+function removeItem(i) {
+  if (items.length <= 2) return;
+  items.splice(i, 1);
+  renderList();
+  drawWheel();
+}
+
+function drawWheel(rot) {
+  const r = rot !== undefined ? rot : angle;
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2, radius = Math.min(cx, cy) - 8;
+  const n = items.length;
+  const seg = (Math.PI * 2) / n;
+
+  ctx.clearRect(0, 0, W, H);
+
+  /* outer glow ring */
+  const glowGrad = ctx.createRadialGradient(cx, cy, radius - 6, cx, cy, radius + 10);
+  glowGrad.addColorStop(0, 'rgba(236,72,153,.2)');
+  glowGrad.addColorStop(1, 'rgba(236,72,153,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 10, 0, Math.PI * 2);
+  ctx.fillStyle = glowGrad;
+  ctx.fill();
+
+  /* segments */
+  items.forEach((item, i) => {
+    const start = r - Math.PI / 2 + i * seg;
+    const end = start + seg;
+    const color = COLORS[i % COLORS.length];
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, start, end);
+    ctx.closePath();
+
+    /* gradient fill */
+    const midAngle = start + seg / 2;
+    const gx = cx + Math.cos(midAngle) * radius * .5;
+    const gy = cy + Math.sin(midAngle) * radius * .5;
+    const grad = ctx.createRadialGradient(gx, gy, 0, cx, cy, radius);
+    grad.addColorStop(0, color + 'ff');
+    grad.addColorStop(1, color + '99');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(4,4,15,.5)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    /* text */
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(midAngle);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,.6)';
+    ctx.shadowBlur = 4;
+    const fontSize = Math.max(11, Math.min(16, 200 / n));
+    ctx.font = `700 ${fontSize}px -apple-system,sans-serif`;
+    const txt = item.length > 10 ? item.slice(0, 9) + '…' : item;
+    ctx.fillText(txt, radius - 20, fontSize * .35);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    /* divider lines */
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(radius, 0);
+    ctx.strokeStyle = 'rgba(4,4,15,.6)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  /* center hub */
+  const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 28);
+  hubGrad.addColorStop(0, '#2d1b4e');
+  hubGrad.addColorStop(1, '#1a0a30');
+  ctx.beginPath();
+  ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+  ctx.fillStyle = hubGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(236,72,153,.5)';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  /* hub inner shine */
+  ctx.beginPath();
+  ctx.arc(cx - 6, cy - 6, 8, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,.1)';
+  ctx.fill();
+
+  /* outer ring */
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(236,72,153,.4)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+function spin() {
+  if (spinning || items.length < 2) return;
+  spinning = true;
+  document.getElementById('spin-btn').disabled = true;
+  spinCount++;
+
+  // Random starting velocity
+  velocity = 0.22 + Math.random() * 0.15;
+  const friction = 0.988;
+  let frame = 0;
+
+  function animate() {
+    if (velocity < 0.002) {
+      spinning = false;
+      document.getElementById('spin-btn').disabled = false;
+      showResult();
+      return;
+    }
+    angle += velocity;
+    velocity *= friction;
+    frame++;
+    drawWheel(angle);
+    animId = requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function showResult() {
+  const n = items.length;
+  const seg = (Math.PI * 2) / n;
+  // pointer is at -PI/2 (top). After rotation by `angle`, segment at pointer:
+  const norm = (((-(angle) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2));
+  const idx = Math.floor(norm / seg) % n;
+  const winner = items[idx];
+
+  document.getElementById('winner-text').textContent = winner;
+  document.getElementById('winner-sub').textContent = `${idx + 1} / ${n} 番目の項目`;
+  document.getElementById('overlay').classList.add('show');
+  startConfetti();
+}
+
+function closeResult(e) {
+  if (e.target === document.getElementById('overlay')) closeOverlay();
+}
+
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('show');
+  stopConfetti();
+}
+
+/* ---- CONFETTI ---- */
+let confParticles = [];
+let confAnimId = null;
+const confCanvas = document.getElementById('confetti');
+const confCtx = confCanvas.getContext('2d');
+
+function resizeConf() {
+  confCanvas.width = innerWidth;
+  confCanvas.height = innerHeight;
+}
+resizeConf();
+window.addEventListener('resize', resizeConf);
+
+function startConfetti() {
+  confParticles = [];
+  for (let i = 0; i < 120; i++) {
+    confParticles.push({
+      x: Math.random() * confCanvas.width,
+      y: -20 - Math.random() * 100,
+      vx: (Math.random() - .5) * 4,
+      vy: 2 + Math.random() * 4,
+      r: 4 + Math.random() * 6,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - .5) * .15,
+      shape: Math.random() > .5 ? 'rect' : 'circle',
+    });
+  }
+  function animate() {
+    confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+    confParticles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rotation += p.rotSpeed;
+      confCtx.save();
+      confCtx.translate(p.x, p.y);
+      confCtx.rotate(p.rotation);
+      confCtx.fillStyle = p.color;
+      confCtx.globalAlpha = Math.max(0, 1 - p.y / confCanvas.height);
+      if (p.shape === 'rect') { confCtx.fillRect(-p.r/2, -p.r/2, p.r, p.r * 0.6); }
+      else { confCtx.beginPath(); confCtx.arc(0, 0, p.r/2, 0, Math.PI*2); confCtx.fill(); }
+      confCtx.restore();
+    });
+    confParticles = confParticles.filter(p => p.y < confCanvas.height + 50);
+    if (confParticles.length > 0) confAnimId = requestAnimationFrame(animate);
+    else confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+  }
+  if (confAnimId) cancelAnimationFrame(confAnimId);
+  animate();
+}
+
+function stopConfetti() {
+  if (confAnimId) cancelAnimationFrame(confAnimId);
+  confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+}
+
+// Init
+renderList();
+drawWheel();
+</script>
+</body>
+</html>
