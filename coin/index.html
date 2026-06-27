@@ -6,107 +6,158 @@
 <title>コイントス — RANDOM PICKER</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#04040f;--gold:#f59e0b;--silver:#94a3b8;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04)}
+:root{
+  --bg:#04040f;--gold:#f59e0b;--gold-lt:#fcd34d;--silver:#94a3b8;
+  --text:#e2e8f0;--muted:#64748b;
+  --border:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04);
+}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
 
-/* NAV */
-nav{
-  width:100%;padding:1.1rem 1.75rem;
-  display:flex;align-items:center;gap:1rem;
-  border-bottom:1px solid var(--border);
-  background:rgba(4,4,15,.9);backdrop-filter:blur(14px);
-  position:sticky;top:0;z-index:100;
-}
-.back{
-  display:inline-flex;align-items:center;gap:.45rem;
-  color:#e2e8f0;font-size:.88rem;font-weight:600;
-  text-decoration:none;
-  padding:.4rem .9rem;border-radius:20px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+/* ── TOP BACK LINK ── fixed, always visible */
+.top-link{
+  position:fixed;top:1.1rem;left:1.3rem;z-index:999;
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.45rem 1.1rem .45rem .85rem;
+  border-radius:50px;
+  background:rgba(245,158,11,.18);
+  border:1.5px solid rgba(245,158,11,.55);
+  color:var(--gold);font-size:.85rem;font-weight:700;
+  text-decoration:none;letter-spacing:.04em;
   transition:all .2s;
+  backdrop-filter:blur(10px);
 }
-.back:hover{background:rgba(255,255,255,.12);color:#fff}
-.back svg{width:15px;height:15px}
-.nav-title{font-weight:800;font-size:1rem;color:var(--gold);letter-spacing:.06em}
+.top-link:hover{background:rgba(245,158,11,.3);color:var(--gold-lt)}
+.top-link svg{width:14px;height:14px}
 
-/* GLOW */
+/* ── AMBIENT GLOW ── */
 .glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.glow-bg::before{content:'';position:absolute;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.11),transparent 70%);top:50%;left:50%;transform:translate(-50%,-55%);animation:pulse 5s ease-in-out infinite alternate}
-@keyframes pulse{from{opacity:.5;transform:translate(-50%,-55%) scale(1)}to{opacity:1;transform:translate(-50%,-55%) scale(1.18)}}
+.glow-bg::before{
+  content:'';position:absolute;
+  width:640px;height:640px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,158,11,.1),transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-55%);
+  animation:pulse 5s ease-in-out infinite alternate;
+}
+@keyframes pulse{
+  from{opacity:.5;transform:translate(-50%,-55%) scale(1)}
+  to{opacity:1;transform:translate(-50%,-55%) scale(1.18)}
+}
 
-/* MAIN */
-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 2rem 3rem;gap:2rem;width:100%;max-width:560px}
+/* ── MAIN ── */
+main{
+  position:relative;z-index:1;flex:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:4rem 2rem 2.5rem;gap:2rem;width:100%;max-width:560px;
+}
 
 .page-title{text-align:center}
-.page-title h1{font-size:2.3rem;font-weight:900;letter-spacing:-.02em}
-.page-title h1 span{background:linear-gradient(135deg,#fde68a,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-title h1{font-size:2.2rem;font-weight:900}
+.page-title h1 span{
+  background:linear-gradient(135deg,#fde68a,#f59e0b,#d97706);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
 .page-title p{color:var(--muted);font-size:.82rem;margin-top:.35rem;letter-spacing:.06em}
 
-/* COIN STAGE */
+/* ── COIN STAGE ── */
 .stage{
-  height:320px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
+  position:relative;width:260px;height:300px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
 }
-.scene{width:220px;height:220px;perspective:750px;user-select:none}
+
+/* Glow ring — SEPARATE element, its own filter doesn't break preserve-3d */
+.coin-glow{
+  position:absolute;
+  width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,158,11,.55) 10%,rgba(245,158,11,.15) 55%,transparent 75%);
+  filter:blur(28px);
+  pointer-events:none;
+  transition:opacity .4s;
+  animation:glowPulse 3s ease-in-out infinite alternate;
+}
+@keyframes glowPulse{
+  from{opacity:.6;transform:scale(.95)}
+  to{opacity:1;transform:scale(1.05)}
+}
+
+/* 3D scene — perspective parent */
+.scene{
+  width:220px;height:220px;
+  perspective:750px;
+  position:relative;
+}
+
+/* 3D coin — NO filter (filter breaks preserve-3d + backface-visibility!) */
 .coin{
   width:100%;height:100%;
-  position:relative;transform-style:preserve-3d;
+  position:relative;
+  transform-style:preserve-3d;
   transform:translateY(0px) rotateX(0deg);
-  filter:drop-shadow(0 10px 30px rgba(245,158,11,.45)) drop-shadow(0 4px 10px rgba(0,0,0,.6));
   will-change:transform;
 }
+
+/* Both faces */
 .face,.back{
-  position:absolute;inset:0;border-radius:50%;
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  overflow:hidden;
+  position:absolute;inset:0;
+  border-radius:50%;overflow:hidden;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
 }
-/* TAILS face is behind — rotate 180deg around X so it shows when coin flips vertically */
+
+/*
+  VERTICAL FLIP: coin rotates around X axis.
+  Back face is pre-rotated 180° around X so it shows when coin reaches rotateX(180deg).
+  Combined transform: rotateX(180coin) + rotateX(180self) = rotateX(360) = identity → right-side-up. ✓
+*/
 .back{transform:rotateX(180deg)}
 
-/* RESULT */
-.result-area{min-height:3.2rem;text-align:center}
+/* ── RESULT ── */
+.result-area{min-height:3rem;text-align:center}
 .result-label{
-  font-size:1.85rem;font-weight:900;letter-spacing:.06em;
-  opacity:0;transform:scale(.5) translateY(10px);
+  font-size:1.8rem;font-weight:900;letter-spacing:.05em;
+  opacity:0;transform:scale(.5) translateY(8px);
   transition:all .45s cubic-bezier(.34,1.56,.64,1);
 }
 .result-label.show{opacity:1;transform:scale(1) translateY(0)}
-.result-label.heads{color:var(--gold);text-shadow:0 0 30px rgba(245,158,11,.7)}
-.result-label.tails{color:#cbd5e1;text-shadow:0 0 30px rgba(148,163,184,.6)}
+.result-label.heads{color:var(--gold);text-shadow:0 0 28px rgba(245,158,11,.7)}
+.result-label.tails{color:#cbd5e1;text-shadow:0 0 28px rgba(148,163,184,.55)}
 .result-sub{font-size:.88rem;color:var(--muted);margin-top:.3rem;opacity:0;transition:opacity .3s .25s}
 .result-label.show~.result-sub{opacity:1}
 
-/* BUTTON */
+/* ── TOSS BUTTON ── */
 .toss-btn{
   padding:.95rem 3.5rem;border-radius:50px;border:none;cursor:pointer;
   background:linear-gradient(135deg,#fcd34d,#f59e0b,#d97706);
   color:#1c0a00;font-size:1.1rem;font-weight:900;letter-spacing:.12em;
-  box-shadow:0 4px 28px rgba(245,158,11,.5);
+  box-shadow:0 4px 28px rgba(245,158,11,.45);
   transition:transform .2s,box-shadow .2s;
   animation:btnPulse 2.8s ease-in-out infinite;
 }
-@keyframes btnPulse{0%,100%{box-shadow:0 4px 28px rgba(245,158,11,.4),0 0 0 0 rgba(245,158,11,.2)}50%{box-shadow:0 6px 36px rgba(245,158,11,.65),0 0 0 11px rgba(245,158,11,0)}}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 4px 28px rgba(245,158,11,.35),0 0 0 0 rgba(245,158,11,.2)}
+  50%{box-shadow:0 6px 36px rgba(245,158,11,.6),0 0 0 11px rgba(245,158,11,0)}
+}
 .toss-btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 40px rgba(245,158,11,.7)}
 .toss-btn:active{transform:scale(.97)}
 .toss-btn:disabled{opacity:.45;cursor:not-allowed;animation:none;transform:none}
 
-/* STATS */
+/* ── STATS ── */
 .stats{
   display:flex;gap:2.5rem;align-items:center;justify-content:center;
   background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:1.1rem 2.5rem;
 }
 .stat-val{font-size:1.8rem;font-weight:900}
-.stat-val.h{color:var(--gold)}
-.stat-val.t{color:#cbd5e1}
+.stat-val.h{color:var(--gold)}.stat-val.t{color:#cbd5e1}
 .stat-sep{color:var(--muted);font-size:1.1rem}
 .stat-label{display:block;font-size:.62rem;font-weight:500;color:var(--muted);letter-spacing:.15em;text-align:center;margin-top:.2rem}
 
-/* HISTORY */
+/* ── HISTORY ── */
 .history{display:flex;flex-direction:column;align-items:center;gap:.65rem;width:100%}
 .hist-label{font-size:.7rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
 .hist-dots{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;min-height:28px}
 .dot{
-  width:28px;height:28px;border-radius:50%;font-size:.62rem;font-weight:700;
+  width:28px;height:28px;border-radius:50%;
+  font-size:.62rem;font-weight:700;
   display:flex;align-items:center;justify-content:center;
   animation:dotPop .35s cubic-bezier(.34,1.56,.64,1) backwards;
 }
@@ -118,13 +169,11 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 <body>
 <div class="glow-bg"></div>
 
-<nav>
-  <a class="back" href="../">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    TOP
-  </a>
-  <span class="nav-title">✦ COIN TOSS</span>
-</nav>
+<!-- Fixed TOP link — always visible -->
+<a class="top-link" href="../">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  TOP
+</a>
 
 <main>
   <div class="page-title">
@@ -133,185 +182,185 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
   </div>
 
   <div class="stage" onclick="toss()">
+    <!-- Glow effect (separate div — safe to use filter here) -->
+    <div class="coin-glow" id="coin-glow"></div>
+
+    <!-- 3D coin scene (NO filter on this or .coin) -->
     <div class="scene">
       <div class="coin" id="coin">
 
-        <!-- ===== HEADS / 表 ===== -->
+        <!-- ═══════ HEADS / 表 ═══════ -->
         <div class="face">
           <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <radialGradient id="hg" cx="36%" cy="30%" r="70%">
+              <radialGradient id="hg" cx="36%" cy="30%" r="68%">
                 <stop offset="0%"   stop-color="#fef9c3"/>
-                <stop offset="28%"  stop-color="#fcd34d"/>
-                <stop offset="62%"  stop-color="#f59e0b"/>
+                <stop offset="25%"  stop-color="#fcd34d"/>
+                <stop offset="58%"  stop-color="#f59e0b"/>
                 <stop offset="100%" stop-color="#78350f"/>
               </radialGradient>
-              <radialGradient id="hrim" cx="50%" cy="50%">
-                <stop offset="80%" stop-color="transparent"/>
-                <stop offset="100%" stop-color="rgba(255,200,0,.12)"/>
-              </radialGradient>
-              <filter id="relief">
-                <feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-color="rgba(80,30,0,.55)"/>
+              <filter id="btcRelief" x="-5%" y="-5%" width="110%" height="110%">
+                <feDropShadow dx="2"  dy="3"  stdDeviation="2" flood-color="rgba(60,20,0,.6)"/>
+                <feDropShadow dx="-1" dy="-1" stdDeviation="1" flood-color="rgba(255,230,80,.3)" result="hi"/>
               </filter>
-              <filter id="emboss">
-                <feDropShadow dx="1.5" dy="2" stdDeviation="1.5" flood-color="rgba(80,30,0,.5)"/>
-                <feDropShadow dx="-1" dy="-1" stdDeviation="1" flood-color="rgba(255,220,80,.25)" result="hi"/>
-              </filter>
-              <clipPath id="coinClip"><circle cx="110" cy="110" r="106"/></clipPath>
+              <clipPath id="cc1"><circle cx="110" cy="110" r="106"/></clipPath>
             </defs>
-            <!-- body -->
+            <!-- coin body -->
             <circle cx="110" cy="110" r="106" fill="url(#hg)"/>
             <!-- milling edge -->
-            <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2.5"/>
-            <circle cx="110" cy="110" r="101" fill="none" stroke="rgba(120,53,15,.4)" stroke-width="1.5" stroke-dasharray="3.5 3" clip-path="url(#coinClip)"/>
-            <!-- outer decorative ring -->
+            <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2.5"/>
+            <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(120,53,15,.45)" stroke-width="2"
+                    stroke-dasharray="3.5 3" clip-path="url(#cc1)"/>
+            <!-- outer ring -->
             <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(255,190,20,.35)" stroke-width="1.4"/>
             <!-- inner ring -->
-            <circle cx="110" cy="110" r="76" fill="none" stroke="rgba(255,190,20,.22)" stroke-width="1"/>
-            <!-- circular text: top arc -->
-            <path id="topArc" d="M 28 110 A 82 82 0 1 1 192 110" fill="none"/>
-            <text font-size="9.5" font-weight="700" fill="rgba(100,40,5,.75)" letter-spacing="3.8" font-family="-apple-system,sans-serif">
-              <textPath href="#topArc" startOffset="5%">· BITCOIN · DIGITAL · DECENTRALIZED · PEER TO PEER ·</textPath>
+            <circle cx="110" cy="110" r="76" fill="none" stroke="rgba(255,190,20,.2)" stroke-width="1"/>
+
+            <!-- curved text: top half -->
+            <path id="ha" d="M 30 110 A 80 80 0 1 1 190 110" fill="none"/>
+            <text font-size="9.5" font-weight="700" fill="rgba(100,40,5,.72)" letter-spacing="3.5"
+                  font-family="-apple-system,sans-serif">
+              <textPath href="#ha" startOffset="3%">· BITCOIN · DIGITAL · DECENTRALIZED · PEER TO PEER ·</textPath>
             </text>
-            <!-- circular text: bottom arc -->
-            <path id="botArc" d="M 192 110 A 82 82 0 1 1 28 110" fill="none"/>
-            <text font-size="9" font-weight="600" fill="rgba(100,40,5,.55)" letter-spacing="4" font-family="-apple-system,sans-serif">
-              <textPath href="#botArc" startOffset="8%">CURRENCY · 2009 · SATOSHI · NAKAMOTO ·</textPath>
+            <!-- curved text: bottom half -->
+            <path id="hb" d="M 190 110 A 80 80 0 1 1 30 110" fill="none"/>
+            <text font-size="9" font-weight="600" fill="rgba(100,40,5,.52)" letter-spacing="4"
+                  font-family="-apple-system,sans-serif">
+              <textPath href="#hb" startOffset="8%">CURRENCY · 2009 · SATOSHI · NAKAMOTO ·</textPath>
             </text>
-            <!-- ₿ symbol - 3D emboss effect -->
-            <text x="113" y="136" text-anchor="middle" font-size="76" font-weight="900"
-                  fill="rgba(255,230,100,.15)" font-family="-apple-system,Arial,sans-serif">₿</text>
-            <text x="111" y="134" text-anchor="middle" font-size="76" font-weight="900"
-                  fill="rgba(80,30,0,.9)" font-family="-apple-system,Arial,sans-serif"
-                  filter="url(#relief)">₿</text>
-            <text x="110" y="133" text-anchor="middle" font-size="76" font-weight="900"
-                  fill="rgba(255,220,80,.85)" font-family="-apple-system,Arial,sans-serif">₿</text>
-            <!-- OMOTE label -->
-            <text x="110" y="186" text-anchor="middle" font-size="10.5" font-weight="700"
-                  fill="rgba(80,30,0,.6)" letter-spacing="6" font-family="-apple-system,sans-serif">表 HEADS</text>
+
+            <!-- ₿ relief layers (embossed look) -->
+            <text x="113" y="137" text-anchor="middle" font-size="80" font-weight="900"
+                  fill="rgba(255,220,60,.12)" font-family="-apple-system,Arial,sans-serif">₿</text>
+            <text x="112" y="136" text-anchor="middle" font-size="80" font-weight="900"
+                  fill="rgba(60,20,0,.88)" font-family="-apple-system,Arial,sans-serif"
+                  filter="url(#btcRelief)">₿</text>
+            <text x="110" y="134" text-anchor="middle" font-size="80" font-weight="900"
+                  fill="rgba(255,218,60,.8)" font-family="-apple-system,Arial,sans-serif">₿</text>
+
             <!-- specular shine -->
-            <ellipse cx="76" cy="62" rx="34" ry="16" fill="rgba(255,255,255,.28)" transform="rotate(-38 76 62)"/>
-            <ellipse cx="88" cy="54" rx="12" ry="5" fill="rgba(255,255,255,.18)" transform="rotate(-38 88 54)"/>
+            <ellipse cx="74" cy="60" rx="36" ry="17" fill="rgba(255,255,255,.28)" transform="rotate(-38 74 60)"/>
+            <ellipse cx="86" cy="52" rx="13" ry="6" fill="rgba(255,255,255,.16)" transform="rotate(-38 86 52)"/>
           </svg>
         </div>
 
-        <!-- ===== TAILS / 裏 ===== -->
-        <!-- Note: rotateX(180deg) is on .back — so content appears right-side-up when coin shows tails -->
+        <!-- ═══════ TAILS / 裏 ═══════
+             This div has transform:rotateX(180deg).
+             When coin reaches rotateX(180deg), combined = 360deg = identity → content appears right-side-up. -->
         <div class="back">
           <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <radialGradient id="tg" cx="36%" cy="30%" r="70%">
+              <radialGradient id="tg" cx="36%" cy="30%" r="68%">
                 <stop offset="0%"   stop-color="#fef9c3"/>
-                <stop offset="28%"  stop-color="#fcd34d"/>
-                <stop offset="62%"  stop-color="#f59e0b"/>
+                <stop offset="25%"  stop-color="#fcd34d"/>
+                <stop offset="58%"  stop-color="#f59e0b"/>
                 <stop offset="100%" stop-color="#78350f"/>
               </radialGradient>
-              <filter id="trelief">
-                <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="rgba(80,30,0,.5)"/>
+              <filter id="tapproved">
+                <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="rgba(60,20,0,.55)"/>
               </filter>
-              <clipPath id="coinClip2"><circle cx="110" cy="110" r="106"/></clipPath>
+              <clipPath id="cc2"><circle cx="110" cy="110" r="106"/></clipPath>
             </defs>
-            <!-- body (same gold as heads) -->
+            <!-- coin body (same gold as heads) -->
             <circle cx="110" cy="110" r="106" fill="url(#tg)"/>
-            <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2.5"/>
-            <circle cx="110" cy="110" r="101" fill="none" stroke="rgba(120,53,15,.4)" stroke-width="1.5" stroke-dasharray="3.5 3" clip-path="url(#coinClip2)"/>
+            <circle cx="110" cy="110" r="106" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2.5"/>
+            <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(120,53,15,.45)" stroke-width="2"
+                    stroke-dasharray="3.5 3" clip-path="url(#cc2)"/>
             <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(255,190,20,.3)" stroke-width="1.3"/>
 
-            <!-- circuit board background rectangle -->
+            <!-- PCB / circuit board area -->
             <rect x="46" y="46" width="128" height="128" rx="6"
-                  fill="rgba(60,25,5,.35)" stroke="rgba(200,150,20,.35)" stroke-width="1.2"/>
+                  fill="rgba(55,22,4,.38)" stroke="rgba(190,140,18,.38)" stroke-width="1.3"/>
 
-            <!-- Top memory bank (rows of segments) -->
-            <rect x="54" y="52" width="112" height="14" rx="2"
-                  fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <!-- memory segment dividers -->
-            <line x1="72"  y1="52" x2="72"  y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="90"  y1="52" x2="90"  y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="108" y1="52" x2="108" y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="126" y1="52" x2="126" y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="144" y1="52" x2="144" y2="66" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <!-- Top memory strip -->
+            <rect x="54" y="52" width="112" height="15" rx="2"
+                  fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".8"/>
+            <line x1="72"  y1="52" x2="72"  y2="67" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="90"  y1="52" x2="90"  y2="67" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="108" y1="52" x2="108" y2="67" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="126" y1="52" x2="126" y2="67" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="144" y1="52" x2="144" y2="67" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
 
-            <!-- Left side components -->
-            <rect x="51" y="76" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
-            <rect x="51" y="96" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
-            <rect x="51" y="116" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
-            <rect x="51" y="136" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <!-- Left side resistors -->
+            <rect x="50" y="76" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="50" y="94" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="50" y="112" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="50" y="130" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="50" y="148" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
 
-            <!-- Right side components -->
-            <rect x="145" y="76" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
-            <rect x="145" y="96" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
-            <rect x="145" y="116" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
-            <rect x="145" y="136" width="24" height="10" rx="2" fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".7"/>
+            <!-- Right side resistors -->
+            <rect x="148" y="76"  width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="148" y="94"  width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="148" y="112" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="148" y="130" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
+            <rect x="148" y="148" width="22" height="9" rx="2" fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".7"/>
 
-            <!-- Central CPU chip -->
-            <rect x="80" y="76" width="60" height="88" rx="4"
-                  fill="rgba(50,20,5,.65)" stroke="rgba(200,150,20,.7)" stroke-width="1.6"/>
+            <!-- Central CPU chip body -->
+            <rect x="78" y="74" width="64" height="92" rx="5"
+                  fill="rgba(44,18,3,.72)" stroke="rgba(200,150,20,.75)" stroke-width="1.8"/>
 
-            <!-- Chip pins top -->
-            <line x1="91"  y1="70" x2="91"  y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="101" y1="70" x2="101" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="111" y1="70" x2="111" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="121" y1="70" x2="121" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="129" y1="70" x2="129" y2="76" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <!-- Chip pins bottom -->
-            <line x1="91"  y1="164" x2="91"  y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="101" y1="164" x2="101" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="111" y1="164" x2="111" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="121" y1="164" x2="121" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="129" y1="164" x2="129" y2="158" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <!-- Chip pins left -->
-            <line x1="74" y1="89"  x2="80" y2="89"  stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="74" y1="102" x2="80" y2="102" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="74" y1="115" x2="80" y2="115" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="74" y1="128" x2="80" y2="128" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="74" y1="141" x2="80" y2="141" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <!-- Chip pins right -->
-            <line x1="146" y1="89"  x2="140" y2="89"  stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="146" y1="102" x2="140" y2="102" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="146" y1="115" x2="140" y2="115" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="146" y1="128" x2="140" y2="128" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="146" y1="141" x2="140" y2="141" stroke="rgba(200,150,20,.6)" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Pins: top -->
+            <line x1="91"  y1="68" x2="91"  y2="74" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="101" y1="68" x2="101" y2="74" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="110" y1="68" x2="110" y2="74" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="119" y1="68" x2="119" y2="74" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="129" y1="68" x2="129" y2="74" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Pins: bottom -->
+            <line x1="91"  y1="166" x2="91"  y2="160" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="101" y1="166" x2="101" y2="160" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="110" y1="166" x2="110" y2="160" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="119" y1="166" x2="119" y2="160" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="129" y1="166" x2="129" y2="160" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Pins: left -->
+            <line x1="72" y1="88"  x2="78" y2="88"  stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="72" y1="101" x2="78" y2="101" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="72" y1="114" x2="78" y2="114" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="72" y1="127" x2="78" y2="127" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="72" y1="140" x2="78" y2="140" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="72" y1="153" x2="78" y2="153" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Pins: right -->
+            <line x1="148" y1="88"  x2="142" y2="88"  stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="148" y1="101" x2="142" y2="101" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="148" y1="114" x2="142" y2="114" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="148" y1="127" x2="142" y2="127" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="148" y1="140" x2="142" y2="140" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="148" y1="153" x2="142" y2="153" stroke="rgba(200,148,18,.7)" stroke-width="2" stroke-linecap="round"/>
 
-            <!-- Chip inner frame -->
-            <rect x="84" y="80" width="52" height="20" rx="2"
-                  fill="rgba(100,50,5,.5)" stroke="rgba(200,150,20,.45)" stroke-width=".8"/>
-            <!-- APPROVED text -->
-            <text x="110" y="94" text-anchor="middle" font-size="9.5" font-weight="800"
-                  fill="rgba(255,210,60,.95)" font-family="monospace,sans-serif" letter-spacing="1.5"
-                  filter="url(#trelief)">APPROVED</text>
+            <!-- Chip label box -->
+            <rect x="84" y="82" width="52" height="18" rx="2"
+                  fill="rgba(90,42,6,.55)" stroke="rgba(200,148,18,.45)" stroke-width=".9"/>
+            <!-- APPROVED -->
+            <text x="110" y="95" text-anchor="middle" font-size="9.5" font-weight="800"
+                  fill="rgba(255,212,60,1)" font-family="monospace,sans-serif" letter-spacing="1.2"
+                  filter="url(#tapproved)">APPROVED</text>
             <!-- 000 -->
-            <text x="110" y="115" text-anchor="middle" font-size="10" font-weight="600"
-                  fill="rgba(255,210,60,.75)" font-family="monospace" letter-spacing="4">000</text>
+            <text x="110" y="115" text-anchor="middle" font-size="10.5" font-weight="600"
+                  fill="rgba(255,208,55,.8)" font-family="monospace" letter-spacing="5">000</text>
             <!-- N₿B -->
-            <text x="110" y="133" text-anchor="middle" font-size="14" font-weight="900"
-                  fill="rgba(255,210,60,.9)" font-family="serif,sans-serif" letter-spacing="3"
-                  filter="url(#trelief)">N₿B</text>
+            <text x="110" y="135" text-anchor="middle" font-size="15" font-weight="900"
+                  fill="rgba(255,215,50,.95)" font-family="serif" letter-spacing="4"
+                  filter="url(#tapproved)">N₿B</text>
             <!-- 2009 -->
-            <text x="110" y="151" text-anchor="middle" font-size="10" font-weight="600"
-                  fill="rgba(255,210,60,.75)" font-family="monospace" letter-spacing="3.5">2009</text>
+            <text x="110" y="154" text-anchor="middle" font-size="10.5" font-weight="600"
+                  fill="rgba(255,208,55,.8)" font-family="monospace" letter-spacing="4">2009</text>
 
-            <!-- Bottom row of chips -->
-            <rect x="54" y="154" width="112" height="14" rx="2"
-                  fill="rgba(100,50,10,.4)" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="72"  y1="154" x2="72"  y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="90"  y1="154" x2="90"  y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="108" y1="154" x2="108" y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="126" y1="154" x2="126" y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
-            <line x1="144" y1="154" x2="144" y2="168" stroke="rgba(200,150,20,.3)" stroke-width=".8"/>
+            <!-- Bottom strip -->
+            <rect x="54" y="153" width="112" height="15" rx="2"
+                  fill="rgba(90,45,8,.45)" stroke="rgba(190,140,18,.32)" stroke-width=".8"/>
+            <line x1="72"  y1="153" x2="72"  y2="168" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="90"  y1="153" x2="90"  y2="168" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="108" y1="153" x2="108" y2="168" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="126" y1="153" x2="126" y2="168" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
+            <line x1="144" y1="153" x2="144" y2="168" stroke="rgba(190,140,18,.3)" stroke-width=".8"/>
 
-            <!-- corner pads -->
-            <rect x="49" y="49" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
-            <rect x="162" y="49" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
-            <rect x="49" y="162" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
-            <rect x="162" y="162" width="9" height="9" rx="1" fill="rgba(200,150,20,.45)"/>
+            <!-- Corner pads -->
+            <rect x="49" y="49" width="8" height="8" rx="1" fill="rgba(190,140,18,.5)"/>
+            <rect x="163" y="49" width="8" height="8" rx="1" fill="rgba(190,140,18,.5)"/>
+            <rect x="49" y="163" width="8" height="8" rx="1" fill="rgba(190,140,18,.5)"/>
+            <rect x="163" y="163" width="8" height="8" rx="1" fill="rgba(190,140,18,.5)"/>
 
-            <!-- URAFACE label -->
-            <text x="110" y="196" text-anchor="middle" font-size="10.5" font-weight="700"
-                  fill="rgba(80,30,0,.6)" letter-spacing="6" font-family="-apple-system,sans-serif">裏 TAILS</text>
-
-            <!-- specular shine (same position — appears mirrored naturally due to rotateX) -->
-            <ellipse cx="76" cy="62" rx="34" ry="16" fill="rgba(255,255,255,.22)" transform="rotate(-38 76 62)"/>
-            <ellipse cx="88" cy="54" rx="12" ry="5" fill="rgba(255,255,255,.14)" transform="rotate(-38 88 54)"/>
+            <!-- specular shine -->
+            <ellipse cx="74" cy="60" rx="36" ry="17" fill="rgba(255,255,255,.2)" transform="rotate(-38 74 60)"/>
           </svg>
         </div>
 
@@ -321,7 +370,7 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 
   <div class="result-area">
     <div class="result-label" id="result-label"></div>
-    <div class="result-sub" id="result-sub"></div>
+    <div class="result-sub"  id="result-sub"></div>
   </div>
 
   <button class="toss-btn" id="toss-btn" onclick="toss()">TOSS!</button>
@@ -345,64 +394,72 @@ main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align
 </main>
 
 <script>
-const coin   = document.getElementById('coin');
-const resLbl = document.getElementById('result-label');
-const resSub = document.getElementById('result-sub');
-const btn    = document.getElementById('toss-btn');
-const dotsEl = document.getElementById('dots');
+const coin    = document.getElementById('coin');
+const glow    = document.getElementById('coin-glow');
+const resLbl  = document.getElementById('result-label');
+const resSub  = document.getElementById('result-sub');
+const btn     = document.getElementById('toss-btn');
+const dotsEl  = document.getElementById('dots');
 
-let rotX = 0;          // cumulative rotation — never reset between tosses
+let rotX = 0;        // cumulative — never reset between tosses
 let animating = false;
 let hCount = 0, tCount = 0;
 const hist = [];
 
-/* ---- helpers ---- */
+/* ── angle calculation ── */
 function calcEndAngle(cur, isHeads) {
-  const BASE    = 4 * 360;          // minimum 4 full spins
+  const BASE    = 4 * 360;       // at least 4 full spins
   const target  = isHeads ? 0 : 180;
   const curr360 = ((cur % 360) + 360) % 360;
   let diff = ((target - curr360) + 360) % 360;
-  if (diff < 45) diff += 360;       // avoid tiny spin if already near target
+  if (diff < 50) diff += 360;   // ensure meaningful rotation even when close to target
   return cur + BASE + diff;
 }
 
-function easeOut(t) { return 1 - Math.pow(1 - t, 2.5); }
+/* ── easing ── */
+function easeOut(t){ return 1 - Math.pow(1 - t, 2.5) }
 
-/* ---- main toss ---- */
+/* ── main toss ── */
 function toss() {
   if (animating) return;
   animating = true;
   btn.disabled = true;
   resLbl.classList.remove('show');
 
-  const isHeads   = Math.random() < 0.5;
+  const isHeads    = Math.random() < 0.5;
   const startAngle = rotX;
   const endAngle   = calcEndAngle(rotX, isHeads);
   const delta      = endAngle - startAngle;
 
-  const DURATION  = 1750;   // ms
-  const ARC_HEIGHT = -190;  // px upward (negative = up in CSS)
+  const DURATION   = 1750;    // ms
+  const ARC        = -195;    // px upward
   const startTime  = performance.now();
 
   function frame(now) {
     const t = Math.min((now - startTime) / DURATION, 1);
 
-    /* rotation: linear phase → ease-out landing */
+    /* rotation: linear in-air → ease-out on landing */
     const SPLIT = 0.78;
     const rotT  = t < SPLIT
-      ? t                                                // linear in-air
-      : SPLIT + (1 - SPLIT) * easeOut((t - SPLIT) / (1 - SPLIT)); // ease-out landing
+      ? t
+      : SPLIT + (1 - SPLIT) * easeOut((t - SPLIT) / (1 - SPLIT));
 
-    /* parabolic arc — peaks at t≈0.42, biased toward faster throw */
-    const y = ARC_HEIGHT * Math.sin(t * Math.PI) * (1 + 0.3 * Math.sin(t * Math.PI));
+    /* parabolic arc */
+    const y = ARC * Math.sin(t * Math.PI);
 
-    coin.style.transform = `translateY(${y.toFixed(2)}px) rotateX(${(startAngle + delta * rotT).toFixed(2)}deg)`;
+    coin.style.transform =
+      `translateY(${y.toFixed(1)}px) rotateX(${(startAngle + delta * rotT).toFixed(2)}deg)`;
+
+    /* sync glow: shrink during flight, expand on land */
+    const glowScale = 1 - 0.4 * Math.sin(t * Math.PI);
+    glow.style.transform = `scale(${glowScale.toFixed(3)})`;
 
     if (t < 1) {
       requestAnimationFrame(frame);
     } else {
       rotX = endAngle;
       coin.style.transform = `translateY(0px) rotateX(${endAngle}deg)`;
+      glow.style.transform  = 'scale(1)';
       animating = false;
       btn.disabled = false;
       showResult(isHeads);
@@ -413,16 +470,13 @@ function toss() {
 }
 
 function showResult(isHeads) {
-  /* counts */
   if (isHeads) { hCount++; document.getElementById('h-count').textContent = hCount; }
   else         { tCount++; document.getElementById('t-count').textContent = tCount; }
 
-  /* label */
   resLbl.textContent = isHeads ? '表 — HEADS' : '裏 — TAILS';
   resLbl.className   = 'result-label show ' + (isHeads ? 'heads' : 'tails');
-  resSub.textContent = isHeads ? 'おめでとう！表が出ました！' : '裏が出ました！';
+  resSub.textContent = isHeads ? '表が出ました！' : '裏が出ました！';
 
-  /* history */
   hist.push(isHeads ? 'H' : 'T');
   if (hist.length > 14) hist.shift();
   dotsEl.innerHTML = '';
